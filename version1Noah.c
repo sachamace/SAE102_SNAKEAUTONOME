@@ -59,6 +59,7 @@ void enable_echo();
 
 
 int main(){
+	clock_t begin = clock();
 	// 2 tableaux contenant les positions des éléments qui constituent le serpent
     int lesX[TAILLE];
 	int lesY[TAILLE];
@@ -88,7 +89,7 @@ int main(){
 
 	// mise en place du plateau
 	initPlateau(lePlateau);
-	
+	system("clear");
 	dessinerPlateau(lePlateau);
 
 
@@ -136,6 +137,11 @@ int main(){
 	} while (touche != STOP && !collision && !gagne);
     enable_echo();
 	gotoxy(1, HAUTEUR_PLATEAU+1);
+
+	clock_t end = clock();
+	double tmpsCPU = ((end - begin)*1.0) / CLOCKS_PER_SEC;
+	printf( "Temps CPU = %.3f secondes\n",tmpsCPU);
+
 	return EXIT_SUCCESS;
 }
 
