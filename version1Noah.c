@@ -99,16 +99,21 @@ int main(){
 	dessinerSerpent(lesX, lesY);
 	disable_echo();
 	direction = DROITE;
-	touche = DROITE;
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
 	do {
-		switch (touche){
-			case GAUCHE : direction=GAUCHE; break;
-			case HAUT 	: direction=HAUT;	break;
-			case BAS 	: direction=BAS;	break;
-			case DROITE : direction=DROITE; break;
+		if (lesPommesX[nbPommes] < lesX[0]){
+			direction = GAUCHE;
+		}
+		else if (lesPommesX[nbPommes] > lesX[0]){
+			direction = DROITE;
+		}
+		else if (lesPommesY[nbPommes] < lesY[0]){
+			direction = HAUT;
+		}
+		else if (lesPommesY[nbPommes] > lesY[0]){
+			direction = BAS;
 		}
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee);
 		if (pommeMangee){
