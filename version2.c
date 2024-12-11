@@ -98,6 +98,7 @@ int main(){
 	bool collision=false;
 	bool gagne = false;
 	bool pommeMangee = false;
+	bool collisionSerpent = false;
 
 	// compteur de pommes mangées
 	int nbPommes = 0;
@@ -131,14 +132,18 @@ int main(){
 			direction = GAUCHE;
 			for (int i = 1; i < TAILLE; i++) {
 				if (lesX[0] - 1 == lesX[i]) {
-					if(lesPommesY[nbPommes] > lesY[0]){
-						direction = BAS;
-					}
-					else{
-						direction = HAUT;
-					}
+					collisionSerpent = true;
 				}
 			}
+			if(collisionSerpent){
+				if(lesPommesY[nbPommes] > lesY[0]){
+					direction = BAS;
+				}
+				else{
+					direction = HAUT;
+				}
+			}
+			collisionSerpent = false;
 		}
 		else if (lesPommesX[nbPommes] > lesX[0]){
 			if(!collision){
@@ -170,9 +175,18 @@ int main(){
 			direction = BAS;
 			for (int i = 1; i < TAILLE; i++) {
 				if (lesY[0] + 1 == lesY[i] ) {
-					direction = DROITE;
+					collisionSerpent = true;
 				}
 			}
+			if(collisionSerpent){
+				if(lesPommesX[nbPommes] > lesX[0]){
+					direction = DROITE;
+				}
+				else{
+					direction = GAUCHE;
+				}
+			}
+			collisionSerpent = false;
 		}
 
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee);
