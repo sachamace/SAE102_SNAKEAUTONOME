@@ -78,6 +78,10 @@ void enable_echo();
 int main(){
 	// départ du calcul du temps CPU
 	clock_t begin = clock();
+
+	// Total des déplacements
+	int deplacement = 0;
+
 	// 2 tableaux contenant les positions des éléments qui constituent le serpent
     int lesX[TAILLE];
 	int lesY[TAILLE];
@@ -137,6 +141,7 @@ int main(){
 		}
 
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee);
+		deplacement ++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee){
@@ -163,6 +168,7 @@ int main(){
 	clock_t end = clock();
 	double tmpsCPU = ((end - begin)*1.0) / CLOCKS_PER_SEC;
 	printf( "Temps CPU = %.3f secondes\n",tmpsCPU);
+	printf( "Le serpent c'est déplacer %d fois\n", deplacement);
 
 	return EXIT_SUCCESS;
 }
