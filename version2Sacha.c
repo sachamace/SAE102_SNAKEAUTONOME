@@ -56,7 +56,7 @@
 typedef char tPlateau[LARGEUR_PLATEAU+1][HAUTEUR_PLATEAU+1];
 
 const int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
-const int lesPommesY[NB_POMMES] = { 8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
+const int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
 
 
 void initPlateau(tPlateau plateau);
@@ -121,7 +121,7 @@ int main(){
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
-	do {
+	do{
 		// Condition pour que le serpent change de direction automatiquement
 		if (lesPommesX[nbPommes] < lesX[0]){
 			direction = GAUCHE;
@@ -156,13 +156,13 @@ int main(){
 				}
 			}
 		}
-	} while (touche != STOP && !collision && !gagne);
+	}while (touche != STOP && !collision && !gagne);
     enable_echo();
 	gotoxy(1, HAUTEUR_PLATEAU+1);
 
 	clock_t end = clock();
 	double tmpsCPU = ((end - begin)*1.0) / CLOCKS_PER_SEC;
-	printf( "Temps CPU = %.3f secondes\n",tmpsCPU);
+	printf("Temps CPU = %.3f secondes\n",tmpsCPU);
 
 	return EXIT_SUCCESS;
 }
