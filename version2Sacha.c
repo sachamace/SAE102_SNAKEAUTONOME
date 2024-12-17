@@ -55,6 +55,12 @@
 #define POS_TP_X_DROITE 40
 #define POS_TP_Y_DROITE 40
 
+// valeur renvoyer en fonction de la distance
+#define CHEMIN_HAUT 1
+#define CHEMIN_BAS 2
+#define CHEMIN_GAUCHE 3
+#define CHEMIN_DROITE 4
+#define CHEMIN_POMME 5
 // définition d'un type pour le plateau : tPlateau
 // Attention, pour que les indices du tableau 2D (qui commencent à 0) coincident
 // avec les coordonées à l'écran (qui commencent à 1), on ajoute 1 aux dimensions
@@ -75,6 +81,8 @@ void effacer(int x, int y);
 void dessinerSerpent(int lesX[], int lesY[]);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme);
 int calculDistance(int lesX[] , int lesY[],int lesPommesX[],int lesPommesY[],int compare);
+void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY);
+bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -87,16 +95,15 @@ void enable_echo();
 int main(){
 	// départ du calcul du temps CPU
 	clock_t begin = clock();
+
+	// Total des déplacements
+	int deplacement = 0;
+
 	// 2 tableaux contenant les positions des éléments qui constituent le serpent
     int lesX[TAILLE];
 	int lesY[TAILLE];
 
-	// représente le booléen qui va chnager en fonction de la distance entre la pomme et le serpent 
-
-	bool result;
-
-	//représente un booléen qui va comparer la position initiale de la tête du serpent par rapport à la pomme pour que la fonction calculDistance est moins de calcul à faire.
-
+	//
 	bool compare;
 
 	// représente la touche frappée par l'utilisateur : touche de direction ou pour l'arrêt
@@ -108,9 +115,10 @@ int main(){
 	// le plateau de jeu
 	tPlateau lePlateau;
 
-	bool collision = false;
+	bool collision=false;
 	bool gagne = false;
 	bool pommeMangee = false;
+	bool teleporter = false;
 
 	// compteur de pommes mangées
 	int nbPommes = 0;
@@ -135,26 +143,48 @@ int main(){
 	dessinerSerpent(lesX, lesY);
 	disable_echo();
 	direction = DROITE;
-	result = calculDistance(lesX , lesY, compare);
+	compare = compareDistancePomme()
+	int meilleurDistance = calculDistance(lesX , lesY , lesPommesX[nbPommes], lesPommesY[nbPommes],compare);
+
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
-	do{
-		
-		// Condition pour que le serpent change de direction automatiquement
-		if (lesPommesX[nbPommes] < lesX[0]){
-			direction = GAUCHE;
+	do {
+
+		if(meilleurDistance == HAUT){
+			if(teleporter){
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+			}
+			else{
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_HAUT_X, TROU_HAUT_Y);
+			}
 		}
-		else if (lesPommesX[nbPommes] > lesX[0] ){
-			direction = DROITE;
+		else if(meilleurDistance == BAS){
+			if(teleporter){
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+			}
+			else{
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_BAS_X, TROU_BAS_Y);
+			}
 		}
-		else if (lesPommesY[nbPommes] < lesY[0] ){
-			direction = HAUT;
+		else if(meilleurDistance == GAUCHE){
+			if(teleporter){
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+			}
+			else{
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_GAUCHE_X, TROU_GAUCHE_Y);
+			}
 		}
-		else if (lesPommesY[nbPommes] > lesY[0] ){
-			direction = BAS;
+		else if(meilleurDistance == DROITE){
+			if(teleporter){
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+			}
+			else{
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_DROITE_X, TROU_DROITE_Y);
+			}
 		}
 
-		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee);
+		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
+		deplacement ++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee){
@@ -356,6 +386,90 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
    	dessinerSerpent(lesX, lesY);
 }
 
+/**
+ * @brief Vérifie si le prochain déplacement du serpent dans la direction spécifiée entraîne une collision.
+ * @param lesX tableau contenant les positions X du serpent.
+ * @param lesY tableau contenant les positions Y du serpent.
+ * @param plateau tableau représentant le plateau de jeu.
+ * @param directionProchaine direction vers laquelle le serpent va se déplacer.
+ * @return true si une collision est détectée, false sinon.
+ */
+bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine) {
+    int nouvelleX = lesX[0];
+    int nouvelleY = lesY[0];
+
+    // Calcul de la nouvelle position en fonction de la direction donnée
+    switch (directionProchaine) {
+        case HAUT:
+            nouvelleY--;
+            break;
+        case BAS:
+            nouvelleY++;
+            break;
+        case GAUCHE:
+            nouvelleX--;
+            break;
+        case DROITE:
+            nouvelleX++;
+            break;
+    }
+
+    // Vérification des collisions avec les bords du tableau ou le corps du serpent
+    if (plateau[nouvelleX][nouvelleY] == BORDURE) {
+        return true; // Collision avec une bordure
+    }
+
+    for (int i = 0; i < TAILLE; i++) {
+        if (lesX[i] == nouvelleX && lesY[i] == nouvelleY) {
+            return true; // Collision avec le corps du serpent
+        }
+    }
+
+    return false; // Pas de collision
+}
+void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY){
+	// Condition pour que le serpent change de direction automatiquement
+		if (objectifX < lesX[0]){
+			*direction = GAUCHE;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				if (objectifY > lesY[0]){
+					*direction = BAS;
+				}
+				else{
+					*direction = HAUT;
+				}
+			}
+		}
+		else if (objectifX > lesX[0]){
+			*direction = DROITE;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				if (objectifY > lesY[0]){
+					*direction = BAS;
+				}
+				else{
+					*direction = HAUT;
+				}
+			}
+		}
+		else if (objectifY < lesY[0]){
+			*direction = HAUT;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				*direction = GAUCHE;
+				if (verifierCollision(lesX, lesY, plateau, *direction)){
+					*direction = DROITE;
+				}
+			}
+		}
+		else if (objectifY > lesY[0]){
+			*direction = BAS;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				*direction = GAUCHE;
+				if (verifierCollision(lesX, lesY, plateau, *direction)){
+					*direction = DROITE;
+				}
+			}
+		}
+}
 int compareDistancePomme(int lesPommesX[] , int lesPommesY[] , int nbPommes)
 {
 	int compare;
