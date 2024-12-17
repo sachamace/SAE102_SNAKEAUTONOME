@@ -340,6 +340,12 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
 	else if (plateau[lesX[0]][lesY[0]] == BORDURE){
 		*collision = true;
 	}
+	// Vérification des collisions avec le corps du serpent
+    for (int i = 1; i < TAILLE; i++) {
+        if (lesX[0] == lesX[i] && lesY[0] == lesY[i]) {
+            *adr_collision = true;
+        }
+    }
    	dessinerSerpent(lesX, lesY);
 }
 
