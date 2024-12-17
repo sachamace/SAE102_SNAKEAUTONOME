@@ -377,6 +377,7 @@ int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY){
 
 	plusPetit = min(min(passageTrouGauche, passageTrouDroit), min(passageTrouHaut, passageTrouBas));
 
+
 	if(plusPetit == passageTrouGauche){
 		return CHEMIN_GAUCHE;
 	}
