@@ -25,10 +25,19 @@
 #define TAILLE 10
 // dimensions du plateau
 #define LARGEUR_PLATEAU 80	
-#define HAUTEUR_PLATEAU 40	//  
+#define HAUTEUR_PLATEAU 40
 // position initiale de la tête du serpent
 #define X_INITIAL 40
 #define Y_INITIAL 20
+// position des trous
+#define TROU_HAUT_X 40
+#define TROU_HAUT_Y 0
+#define TROU_BAS_X 40
+#define TROU_BAS_Y 40
+#define TROU_GAUCHE_X 0
+#define TROU_GAUCHE_Y 20
+#define TROU_DROITE_X 80
+#define TROU_DROITE_Y 20
 // nombre de pommes à manger pour gagner
 #define NB_POMMES 10
 // temporisation entre deux déplacements du serpent (en microsecondes)
@@ -51,6 +60,7 @@
 #define CHEMIN_BAS 2
 #define CHEMIN_GAUCHE 3
 #define CHEMIN_DROITE 4
+#define CHEMIN_POMME 5
 
 
 // définition d'un type pour le plateau : tPlateau
@@ -70,9 +80,10 @@ void ajouterPomme(tPlateau plateau, int iPomme);
 void afficher(int, int, char);
 void effacer(int x, int y);
 void dessinerSerpent(int lesX[], int lesY[]);
-void directionSerpent(int lesX[], int lesY[], tPlateau plateau, char *direction, int nbPommes);
+void directionSerpentVersPomme(int lesX[], int lesY[], tPlateau plateau, char *direction, int nbPommes);
+void directionSerpentVersTrou(int lesX[], int lesY[], tPlateau plateau, char *direction, int trouX, int trouY);
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
-void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme);
+void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme, bool * teleporter);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -105,6 +116,7 @@ int main(){
 	bool collision=false;
 	bool gagne = false;
 	bool pommeMangee = false;
+	bool teleporter = false;
 
 	// compteur de pommes mangées
 	int nbPommes = 0;
@@ -135,17 +147,23 @@ int main(){
 	// si toutes les pommes sont mangées
 	do {
 
-		if(meilleurDistance == )
+		if(meilleurDistance == HAUT){
+			if(teleporter){
+				directionSerpentVersPomme(lesX, lesY, lePlateau, &direction, nbPommes);
+			}
+			else{
+				directionSerpentVersTrou(lesX, lesY, lePlateau, &direction, TROU_HAUT_X, TROU_HAUT_Y);
+			}
+		}
 
-		directionSerpent(lesX, lesY, lePlateau, &direction, nbPommes);
-
-		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee);
+		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
 		deplacement ++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee){
             nbPommes++;
 			gagne = (nbPommes==NB_POMMES);
+			teleporter = false;
 			if (!gagne){
 				ajouterPomme(lePlateau, nbPommes);
 				pommeMangee = false;
@@ -275,8 +293,8 @@ void dessinerSerpent(int lesX[], int lesY[]){
 	afficher(lesX[0], lesY[0],TETE);
 }
 
-void directionSerpent(int lesX[], int lesY[], tPlateau plateau, char *direction, int nbPommes){
-	// Condition pour que le serpent change de direction automatiquement
+void directionSerpentVersPomme(int lesX[], int lesY[], tPlateau plateau, char *direction, int nbPommes){
+		// Condition pour que le serpent change de direction automatiquement
 		if (lesPommesX[nbPommes] < lesX[0]){
 			*direction = GAUCHE;
 			if(verifierCollision(lesX, lesY, plateau, *direction)){
@@ -309,6 +327,50 @@ void directionSerpent(int lesX[], int lesY[], tPlateau plateau, char *direction,
 			}
 		}
 		else if (lesPommesY[nbPommes] > lesY[0]){
+			*direction = BAS;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				*direction = GAUCHE;
+				if (verifierCollision(lesX, lesY, plateau, *direction)){
+					*direction = DROITE;
+				}
+			}
+		}
+}
+
+void directionSerpentVersTrou(int lesX[], int lesY[], tPlateau plateau, char *direction, int trouX, int trouY){
+	// Condition pour que le serpent change de direction automatiquement
+		if (trouX < lesX[0]){
+			*direction = GAUCHE;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				if (trouY > lesY[0]){
+					*direction = BAS;
+				}
+				else{
+					*direction = HAUT;
+				}
+			}
+		}
+		else if (trouX > lesX[0]){
+			*direction = DROITE;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				if (trouY > lesY[0]){
+					*direction = BAS;
+				}
+				else{
+					*direction = HAUT;
+				}
+			}
+		}
+		else if (trouY < lesY[0]){
+			*direction = HAUT;
+			if(verifierCollision(lesX, lesY, plateau, *direction)){
+				*direction = GAUCHE;
+				if (verifierCollision(lesX, lesY, plateau, *direction)){
+					*direction = DROITE;
+				}
+			}
+		}
+		else if (trouY > lesY[0]){
 			*direction = BAS;
 			if(verifierCollision(lesX, lesY, plateau, *direction)){
 				*direction = GAUCHE;
@@ -371,7 +433,7 @@ bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionP
 * @param collision de type bool, vérifie si il y a une collision
 * @param pomme de type bool, vérifie si une pomme est mangée
 */
-void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme){
+void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme, bool * teleporter){
 	// efface le dernier élément avant d'actualiser la position de tous les 
 	// élémentds du serpent avant de le  redessiner et détecte une
 	// collision avec une pomme ou avec une bordure
@@ -401,15 +463,19 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
 	for (int i = 1; i < TAILLE; i++) {
         if (lesX[0] <= 0 ) {
             lesX[0] = LARGEUR_PLATEAU;
+			*teleporter = true;
         }
 		else if (lesX[0] > LARGEUR_PLATEAU) {
 			lesX[0] = 1;
+			*teleporter = true;
 		}
 		else if (lesY[0] <= 0) {
 			lesY[0] = HAUTEUR_PLATEAU;
+			*teleporter = true;
 		}
 		else if (lesY[0] > HAUTEUR_PLATEAU) {
 			lesY[0] = 1;
+			*teleporter = true;
 		}
     }
 
