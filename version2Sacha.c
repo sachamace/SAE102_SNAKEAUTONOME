@@ -67,7 +67,7 @@ void afficher(int, int, char);
 void effacer(int x, int y);
 void dessinerSerpent(int lesX[], int lesY[]);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme);
-int calculDistance(int lesX[] , int lesY[],bool compare);
+int calculDistance(int lesX[] , int lesY[],int lesPommesX[],int lesPommesY[],int compare);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -128,12 +128,11 @@ int main(){
 	dessinerSerpent(lesX, lesY);
 	disable_echo();
 	direction = DROITE;
-
+	result = calculDistance(lesX , lesY, compare);
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
 	do{
 		
-		result = calculDistance(lesX , lesY, compare);
 		// Condition pour que le serpent change de direction automatiquement
 		if (lesPommesX[nbPommes] < lesX[0]){
 			direction = GAUCHE;
@@ -152,6 +151,7 @@ int main(){
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee){
+			result = calculDistance(lesX , lesY, compare);
             nbPommes++;
 			gagne = (nbPommes==NB_POMMES);
 			if (!gagne){
@@ -343,17 +343,42 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
 	// Vérification des collisions avec le corps du serpent
     for (int i = 1; i < TAILLE; i++) {
         if (lesX[0] == lesX[i] && lesY[0] == lesY[i]) {
-            *adr_collision = true;
+            *collision = true;
         }
     }
    	dessinerSerpent(lesX, lesY);
 }
 
-int calculDistance(int lesX[] , int lesY[], bool compare)
+int compareDistancePomme(int lesPommesX[] , int lesPommesY[] , int nbPommes)
 {
-	bool resultDirection;
+	int compare;
+	if(lesPommesX[nbPommes] == X_INITIAL && lesPommesY[nbPommes] == Y_INITIAL){
+		compare = 1; // quand pomme se situe au centre du tableau
+	}
+	else if(lesPommesX[nbPommes] > X_INITIAL && lesPommesY[nbPommes] > Y_INITIAL){
+		compare = 2; // quand pomme se situe en bas à droite 
+	}
+	else if(lesPommesX[nbPommes] < X_INITIAL && lesPommesY[nbPommes] < Y_INITIAL){
+		compare = 3; // quand pomme se situe en haut à gauche 
+	}
+	else if(lesPommesX[nbPommes] < X_INITIAL && lesPommesY[nbPommes] > Y_INITIAL){
+		compare = 4; // quand pomme se situe en haut à droite 
+	}
+	else if(lesPommesX[nbPommes] > X_INITIAL && lesPommesY[nbPommes] < Y_INITIAL){
+		compare = 5; // quand pomme se situe en bas a gauche
+	}
+	return compare;
 }
 
+int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],int compare)
+{
+	int resultDirection , distanceWE , distanceEW , distanceP , distanceNS , distanceSN;
+	switch(compare){
+		case 1 :
+			distanceP
+	}
+	
+}
 /************************************************/
 /*				 FONCTIONS UTILITAIRES 			*/
 /************************************************/
