@@ -80,8 +80,8 @@ void afficher(int, int, char);
 void effacer(int x, int y);
 void dessinerSerpent(int lesX[], int lesY[]);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme, bool * teleporter);
-int compareDistancePomme(int lesPommesX[] , int lesPommesY[] , int nbPommes);
-int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],int compare , int nbPommes);
+int compareDistancePomme(int pommeX, int pommeY , int nbPommes);
+int calculDistance(int lesX[] , int lesY[],  int pommeX, int pommeY,int compare , int nbPommes);
 void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY);
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
 void gotoxy(int x, int y);
@@ -147,12 +147,14 @@ int main(){
 	dessinerSerpent(lesX, lesY);
 	disable_echo();
 	direction = DROITE;
-	compare = compareDistancePomme(lesPommesX, lesPommesY, nbPommes);
-	meilleurDistance = calculDistance(lesX , lesY , lesPommesX, lesPommesY,compare,nbPommes);
+	compare = compareDistancePomme(lesPommesX[nbPommes], lesPommesY[nbPommes], nbPommes);
+	meilleurDistance = calculDistance(lesX , lesY , lesPommesX[nbPommes], lesPommesY[nbPommes],compare,nbPommes);
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
 	do {
+		printf("%d\n",compare);
+		printf("%d\n",meilleurDistance);
 		if(meilleurDistance == CHEMIN_HAUT){
 			if(teleporter){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
@@ -185,15 +187,18 @@ int main(){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, POS_TP_X_DROITE, POS_TP_Y_DROITE);
 			}
 		}
-
+		else{
+			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+		}
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
 		deplacement ++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee){
-			compare = compareDistancePomme(lesPommesX, lesPommesY, nbPommes);
-			meilleurDistance = calculDistance(lesX , lesY , lesPommesX, lesPommesY,compare,nbPommes);
             nbPommes++;
+			compare = compareDistancePomme(lesPommesX[nbPommes], lesPommesY[nbPommes], nbPommes);
+			meilleurDistance = calculDistance(lesX , lesY , lesPommesX[nbPommes], lesPommesY[nbPommes],compare,nbPommes);
+			teleporter = false;
 			gagne = (nbPommes==NB_POMMES);
 			if (!gagne){
 				ajouterPomme(lePlateau, nbPommes);
@@ -478,28 +483,32 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 			}
 		}
 }
-int compareDistancePomme(int lesPommesX[] , int lesPommesY[] , int nbPommes)
+int compareDistancePomme(int pommeX, int pommeY, int nbPommes)
 {
 	int compare;
-	if(lesPommesX[nbPommes] == X_INITIAL && lesPommesY[nbPommes] == Y_INITIAL){
+	printf("%d\n",pommeX);
+	printf("%d\n",pommeY);
+	printf("%d\n",X_INITIAL);
+	printf("%d\n",Y_INITIAL);
+	if(pommeX == X_INITIAL && pommeY == Y_INITIAL){
 		compare = 1; // quand pomme se situe au centre du tableau
 	}
-	else if(lesPommesX[nbPommes] > X_INITIAL && lesPommesY[nbPommes] > Y_INITIAL){
+	else if(pommeX > X_INITIAL && pommeY > Y_INITIAL){
 		compare = 2; // quand pomme se situe en bas à droite 
 	}
-	else if(lesPommesX[nbPommes] < X_INITIAL && lesPommesY[nbPommes] < Y_INITIAL){
+	else if(pommeX < X_INITIAL && pommeY < Y_INITIAL){
 		compare = 3; // quand pomme se situe en haut à gauche 
 	}
-	else if(lesPommesX[nbPommes] < X_INITIAL && lesPommesY[nbPommes] > Y_INITIAL){
+	else if(pommeX > X_INITIAL && pommeY < Y_INITIAL){
 		compare = 4; // quand pomme se situe en haut à droite 
 	}
-	else if(lesPommesX[nbPommes] > X_INITIAL && lesPommesY[nbPommes] < Y_INITIAL){
+	else if(pommeX < X_INITIAL && pommeY > Y_INITIAL){
 		compare = 5; // quand pomme se situe en bas a gauche
 	}
 	return compare;
 }
 
-int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],int compare , int nbPommes)
+int calculDistance(int lesX[] , int lesY[], int pommeX, int pommeY,int compare , int nbPommes)
 {
 	int resultDirection , distanceGD , distanceDG, distancePomme , distanceHB , distanceBH;
 	switch(compare){
@@ -507,13 +516,16 @@ int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],in
 			resultDirection = 1;
 			break;
 		case 2:
-			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
-			distanceHB = ((abs(lesX[0] - POS_TP_X_HAUT) + abs(lesY[0] - POS_TP_Y_HAUT)) + (abs(lesPommesX[nbPommes] - POS_TP_X_BAS) + abs(lesPommesY[nbPommes] - POS_TP_Y_BAS)));
-			distanceGD = ((abs(lesX[0] - POS_TP_X_GAUCHE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_DROITE) + abs(lesPommesY[nbPommes] - POS_TP_Y_DROITE)));
-			if(distancePomme > distanceHB && distancePomme > distanceGD){
+			distancePomme = (abs(lesX[0] - pommeX)+abs(lesY[0] - pommeY));
+			distanceHB = ((abs(lesX[0] - POS_TP_X_HAUT) + abs(lesY[0] - POS_TP_Y_HAUT)) + (abs(pommeX - POS_TP_X_BAS) + abs(pommeY - POS_TP_Y_BAS)));
+			distanceGD = ((abs(lesX[0] - POS_TP_X_GAUCHE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(pommeX - POS_TP_X_DROITE) + abs(pommeY  - POS_TP_Y_DROITE)));
+			printf("%d\n",distancePomme);
+			printf("%d\n",distanceHB);
+			printf("%d\n",distanceGD);
+			if(distancePomme < distanceHB && distancePomme < distanceGD){
 				resultDirection = 1;
 			}
-			else if(distanceHB > distanceGD && distanceHB > distancePomme){
+			else if(distanceHB < distanceGD && distanceHB < distancePomme){
 				resultDirection = 2;
 			}
 			else{
@@ -521,13 +533,16 @@ int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],in
 			}
 			break;
 		case 3 :
-			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
-			distanceBH = ((abs(lesX[0] - POS_TP_X_BAS) + abs(lesY[0] - POS_TP_Y_BAS)) + (abs(lesPommesX[nbPommes] - POS_TP_X_HAUT) + abs(lesPommesY[nbPommes] - POS_TP_Y_HAUT)));
-			distanceDG = ((abs(lesX[0] - POS_TP_X_DROITE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_GAUCHE) + abs(lesPommesY[nbPommes] - POS_TP_Y_GAUCHE)));
-			if(distancePomme > distanceBH && distancePomme > distanceDG){
+			distancePomme = (abs(lesX[0] - pommeX)+abs(lesY[0] - pommeY ));
+			distanceBH = ((abs(lesX[0] - POS_TP_X_BAS) + abs(lesY[0] - POS_TP_Y_BAS)) + (abs(pommeX - POS_TP_X_HAUT) + abs(pommeY  - POS_TP_Y_HAUT)));
+			distanceDG = ((abs(lesX[0] - POS_TP_X_DROITE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(pommeX - POS_TP_X_GAUCHE) + abs(pommeY  - POS_TP_Y_GAUCHE)));
+			printf("%d\n",distancePomme);
+			printf("%d\n",distanceBH);
+			printf("%d\n",distanceDG);
+			if(distancePomme < distanceBH && distancePomme < distanceDG){
 				resultDirection = 1;
 			}
-			else if(distanceBH > distanceDG && distanceBH > distancePomme){
+			else if(distanceBH < distanceDG && distanceBH < distancePomme){
 				resultDirection = 4;
 			}
 			else{
@@ -535,13 +550,16 @@ int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],in
 			}
 			break;
 		case 4 :
-			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
-			distanceGD = ((abs(lesX[0] - POS_TP_X_GAUCHE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_DROITE) + abs(lesPommesY[nbPommes] - POS_TP_Y_DROITE)));
-			distanceBH = ((abs(lesX[0] - POS_TP_X_BAS) + abs(lesY[0] - POS_TP_Y_BAS)) + (abs(lesPommesX[nbPommes] - POS_TP_X_HAUT) + abs(lesPommesY[nbPommes] - POS_TP_Y_HAUT)));
-			if(distancePomme > distanceBH && distancePomme > distanceGD){
+			distancePomme = (abs(lesX[0] - pommeX)+abs(lesY[0] - pommeY ));
+			distanceGD = ((abs(lesX[0] - POS_TP_X_GAUCHE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(pommeX- POS_TP_X_DROITE) + abs(pommeY - POS_TP_Y_DROITE)));
+			distanceBH = ((abs(lesX[0] - POS_TP_X_BAS) + abs(lesY[0] - POS_TP_Y_BAS)) + (abs(pommeX- POS_TP_X_HAUT) + abs(pommeY  - POS_TP_Y_HAUT)));
+			printf("%d\n",distancePomme);
+			printf("%d\n",distanceBH);
+			printf("%d\n",distanceGD);
+			if(distancePomme < distanceBH && distancePomme < distanceGD){
 				resultDirection = 1;
 			}
-			else if(distanceGD > distanceBH && distanceGD > distancePomme){
+			else if(distanceGD < distanceBH && distanceGD < distancePomme){
 				resultDirection = 5;
 			}
 			else{
@@ -549,13 +567,16 @@ int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],in
 			}
 			break;
 		case 5 : 
-			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
-			distanceHB = ((abs(lesX[0] - POS_TP_X_HAUT) + abs(lesY[0] - POS_TP_Y_HAUT)) + (abs(lesPommesX[nbPommes] - POS_TP_X_BAS) + abs(lesPommesY[nbPommes] - POS_TP_Y_BAS)));
-			distanceDG = ((abs(lesX[0] - POS_TP_X_DROITE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_GAUCHE) + abs(lesPommesY[nbPommes] - POS_TP_Y_GAUCHE)));
-			if(distancePomme > distanceHB && distancePomme > distanceDG){
+			distancePomme = (abs(lesX[0] - pommeX)+abs(lesY[0] - pommeY ));
+			distanceHB = ((abs(lesX[0] - POS_TP_X_HAUT) + abs(lesY[0] - POS_TP_Y_HAUT)) + (abs(pommeX - POS_TP_X_BAS) + abs(pommeY  - POS_TP_Y_BAS)));
+			distanceDG = ((abs(lesX[0] - POS_TP_X_DROITE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(pommeX- POS_TP_X_GAUCHE) + abs(pommeY - POS_TP_Y_GAUCHE)));
+			printf("%d\n",distancePomme);
+			printf("%d\n",distanceHB);
+			printf("%d\n",distanceDG);
+			if(distancePomme < distanceHB && distancePomme < distanceDG){
 				resultDirection = 1;
 			}
-			else if(distanceDG > distanceHB && distanceDG > distancePomme){
+			else if(distanceDG < distanceHB && distanceDG < distancePomme){
 				resultDirection = 5;
 			}
 			else{
