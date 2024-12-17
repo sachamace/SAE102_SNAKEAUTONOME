@@ -82,6 +82,8 @@ void effacer(int x, int y);
 void dessinerSerpent(int lesX[], int lesY[]);
 void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY);
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
+int min(int a, int b);
+int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme, bool * teleporter);
 void gotoxy(int x, int y);
 int kbhit();
@@ -140,7 +142,7 @@ int main(){
 	dessinerSerpent(lesX, lesY);
 	disable_echo();
 	direction = DROITE;
-	int meilleurDistance = HAUT;
+	int meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
@@ -186,6 +188,7 @@ int main(){
 		if (pommeMangee){
             nbPommes++;
 			gagne = (nbPommes==NB_POMMES);
+			meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 			teleporter = false;
 			if (!gagne){
 				ajouterPomme(lePlateau, nbPommes);
@@ -360,14 +363,32 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 		}
 }
 
+// Définition de la fonction min pour obtenir la plus petite valeur entre deux entiers
+int min(int a, int b) {
+    return (a < b) ? a : b;
+}
+
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY){
-	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme;
+	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme, plusPetit;
 	passageTrouGauche = abs(lesX[0]-TROU_GAUCHE_X) + abs(TROU_DROITE_X-pommeX) + abs(lesY[0]-TROU_GAUCHE_Y) + abs(TROU_DROITE_Y-pommeY);
 	passageTrouDroit = abs(lesX[0]-TROU_DROITE_X) + abs(TROU_GAUCHE_X-pommeX) + abs(lesY[0]-TROU_DROITE_Y) + abs(TROU_GAUCHE_Y-pommeY);
 	passageTrouHaut = abs(lesX[0]-TROU_HAUT_X) + abs(TROU_BAS_X-pommeX) + abs(lesY[0]-TROU_HAUT_Y) + abs(TROU_BAS_Y-pommeY);
 	passageTrouBas = abs(lesX[0]-TROU_BAS_X) + abs(TROU_HAUT_X-pommeX) + abs(lesY[0]-TROU_BAS_Y) + abs(TROU_HAUT_Y-pommeY);
 
-	
+	plusPetit = min(min(passageTrouGauche, passageTrouDroit), min(passageTrouHaut, passageTrouBas));
+
+	if(plusPetit == passageTrouGauche){
+		return CHEMIN_GAUCHE;
+	}
+	else if(plusPetit == passageTrouDroit){
+		return CHEMIN_DROITE;
+	}
+	else if(plusPetit == passageTrouHaut){
+		return CHEMIN_HAUT;
+	}
+	else{
+		return CHEMIN_BAS;
+	}
 }
 
 /**
