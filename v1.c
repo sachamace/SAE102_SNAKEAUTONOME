@@ -148,7 +148,7 @@ int main(){
 	// si toutes les pommes sont mangées
 	do {
 
-		if(meilleurDistance == HAUT){
+		if(meilleurDistance == CHEMIN_HAUT){
 			if(teleporter){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 			}
@@ -156,7 +156,7 @@ int main(){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_HAUT_X, TROU_HAUT_Y);
 			}
 		}
-		else if(meilleurDistance == BAS){
+		else if(meilleurDistance == CHEMIN_BAS){
 			if(teleporter){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 			}
@@ -164,7 +164,7 @@ int main(){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_BAS_X, TROU_BAS_Y);
 			}
 		}
-		else if(meilleurDistance == GAUCHE){
+		else if(meilleurDistance == CHEMIN_GAUCHE){
 			if(teleporter){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 			}
@@ -172,13 +172,16 @@ int main(){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_GAUCHE_X, TROU_GAUCHE_Y);
 			}
 		}
-		else if(meilleurDistance == DROITE){
+		else if(meilleurDistance == CHEMIN_DROITE){
 			if(teleporter){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 			}
 			else{
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_DROITE_X, TROU_DROITE_Y);
 			}
+		}
+		else{
+			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 		}
 
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
@@ -188,10 +191,10 @@ int main(){
 		if (pommeMangee){
             nbPommes++;
 			gagne = (nbPommes==NB_POMMES);
-			meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 			teleporter = false;
 			if (!gagne){
 				ajouterPomme(lePlateau, nbPommes);
+				meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 				pommeMangee = false;
 			}	
 			
@@ -326,9 +329,15 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 			if(verifierCollision(lesX, lesY, plateau, *direction)){
 				if (objectifY > lesY[0]){
 					*direction = BAS;
+					if(verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = HAUT;
+					}
 				}
 				else{
 					*direction = HAUT;
+					if(verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = BAS;
+					}
 				}
 			}
 		}
@@ -337,27 +346,49 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 			if(verifierCollision(lesX, lesY, plateau, *direction)){
 				if (objectifY > lesY[0]){
 					*direction = BAS;
+					if(verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = HAUT;
+					}
 				}
 				else{
 					*direction = HAUT;
+					if(verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = BAS;
+					}
 				}
 			}
 		}
 		else if (objectifY < lesY[0]){
 			*direction = HAUT;
 			if(verifierCollision(lesX, lesY, plateau, *direction)){
-				*direction = GAUCHE;
-				if (verifierCollision(lesX, lesY, plateau, *direction)){
+				if (objectifX > lesX[0]){
 					*direction = DROITE;
+					if(verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = GAUCHE;
+					}
+				}
+				else{
+					*direction = GAUCHE;
+					if (verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = DROITE;
+					}
 				}
 			}
 		}
 		else if (objectifY > lesY[0]){
 			*direction = BAS;
 			if(verifierCollision(lesX, lesY, plateau, *direction)){
-				*direction = GAUCHE;
-				if (verifierCollision(lesX, lesY, plateau, *direction)){
+				if (objectifX > lesX[0]){
 					*direction = DROITE;
+					if(verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = GAUCHE;
+					}
+				}
+				else{
+					*direction = GAUCHE;
+					if (verifierCollision(lesX, lesY, plateau, *direction)){
+						*direction = DROITE;
+					}
 				}
 			}
 		}
@@ -374,9 +405,9 @@ int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY){
 	passageTrouDroit = abs(lesX[0]-TROU_DROITE_X) + abs(TROU_GAUCHE_X-pommeX) + abs(lesY[0]-TROU_DROITE_Y) + abs(TROU_GAUCHE_Y-pommeY);
 	passageTrouHaut = abs(lesX[0]-TROU_HAUT_X) + abs(TROU_BAS_X-pommeX) + abs(lesY[0]-TROU_HAUT_Y) + abs(TROU_BAS_Y-pommeY);
 	passageTrouBas = abs(lesX[0]-TROU_BAS_X) + abs(TROU_HAUT_X-pommeX) + abs(lesY[0]-TROU_BAS_Y) + abs(TROU_HAUT_Y-pommeY);
+	passageDirectPomme = abs(lesX[0]-pommeX) + abs(lesY[0]-pommeY);
 
-	plusPetit = min(min(passageTrouGauche, passageTrouDroit), min(passageTrouHaut, passageTrouBas));
-
+	plusPetit = min((min(passageTrouGauche, passageTrouDroit), min(passageTrouHaut, passageTrouBas)), passageDirectPomme);
 
 	if(plusPetit == passageTrouGauche){
 		return CHEMIN_GAUCHE;
@@ -387,8 +418,11 @@ int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY){
 	else if(plusPetit == passageTrouHaut){
 		return CHEMIN_HAUT;
 	}
-	else{
+	else if(plusPetit == passageTrouBas){
 		return CHEMIN_BAS;
+	}
+	else{
+		return CHEMIN_POMME;
 	}
 }
 
