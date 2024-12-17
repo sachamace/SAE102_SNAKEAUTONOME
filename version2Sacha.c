@@ -20,7 +20,6 @@
 #include <fcntl.h>
 #include <time.h>
 
-
 // taille du serpent
 #define TAILLE 10
 // dimensions du plateau
@@ -378,7 +377,7 @@ int compareDistancePomme(int lesPommesX[] , int lesPommesY[] , int nbPommes)
 	return compare;
 }
 
-int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],int compare)
+int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],int compare , int nbPommes)
 {
 	int resultDirection , distanceGD , distanceDG, distancePomme , distanceHB , distanceBH;
 	switch(compare){
@@ -386,8 +385,61 @@ int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],in
 			resultDirection = 1;
 			break;
 		case 2:
-			distanceHB = (lesX[0])
-			distanceGD = 
+			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
+			distanceHB = ((abs(lesX[0] - POS_TP_X_HAUT) + abs(lesY[0] - POS_TP_Y_HAUT)) + (abs(lesPommesX[nbPommes] - POS_TP_X_BAS) + abs(lesPommesY[nbPommes] - POS_TP_Y_BAS)));
+			distanceGD = ((abs(lesX[0] - POS_TP_X_GAUCHE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_DROITE) + abs(lesPommesY[nbPommes] - POS_TP_Y_DROITE)))
+			if(distancePomme > distanceHB && distancePomme > distanceGD){
+				resultDirection = 1;
+			}
+			else if(distanceHB > distanceGD && distanceHB > distancePomme){
+				resultDirection = 2;
+			}
+			else{
+				resultDirection = 3;
+			}
+			break;
+		case 3 :
+			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
+			distanceBH = ((abs(lesX[0] - POS_TP_X_BAS) + abs(lesY[0] - POS_TP_Y_BAS)) + (abs(lesPommesX[nbPommes] - POS_TP_X_HAUT) + abs(lesPommesY[nbPommes] - POS_TP_Y_HAUT)));
+			distanceDG = ((abs(lesX[0] - POS_TP_X_DROITE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_GAUCHE) + abs(lesPommesY[nbPommes] - POS_TP_Y_GAUCHE)));
+			if(distancePomme > distanceBH && distancePomme > distanceDG){
+				resultDirection = 1;
+			}
+			else if(distanceBH > distanceDG && distanceBH > distancePomme){
+				resultDirection = 4;
+			}
+			else{
+				resultDirection = 5;
+			}
+			break;
+		case 4 :
+			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
+			distanceGD = ((abs(lesX[0] - POS_TP_X_GAUCHE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_DROITE) + abs(lesPommesY[nbPommes] - POS_TP_Y_DROITE)))
+			distanceBH = ((abs(lesX[0] - POS_TP_X_BAS) + abs(lesY[0] - POS_TP_Y_BAS)) + (abs(lesPommesX[nbPommes] - POS_TP_X_HAUT) + abs(lesPommesY[nbPommes] - POS_TP_Y_HAUT)));
+			if(distancePomme > distanceBH && distancePomme > distanceGD){
+				resultDirection = 1;
+			}
+			else if(distanceGD > distanceBH && distanceGD > distancePomme){
+				resultDirection = 5;
+			}
+			else{
+				resultDirection = 4;
+			}
+			break;
+		case 5 : 
+			distancePomme = (abs(lesX[0] - lesPommesX[nbPommes])+abs(lesY[0] - lesPommesY[nbPommes]));
+			distanceHB = ((abs(lesX[0] - POS_TP_X_HAUT) + abs(lesY[0] - POS_TP_Y_HAUT)) + (abs(lesPommesX[nbPommes] - POS_TP_X_BAS) + abs(lesPommesY[nbPommes] - POS_TP_Y_BAS)));
+			distanceDG = ((abs(lesX[0] - POS_TP_X_DROITE) + abs(lesY[0] - POS_TP_Y_DROITE)) + (abs(lesPommesX[nbPommes] - POS_TP_X_GAUCHE) + abs(lesPommesY[nbPommes] - POS_TP_Y_GAUCHE)));
+			if(distancePomme > distanceHB && distancePomme > distanceDG){
+				resultDirection = 1;
+			}
+			else if(distanceDG > distanceHB && distanceDG > distancePomme){
+				resultDirection = 5;
+			}
+			else{
+				resultDirection = 2;
+			}
+			break;
 	}
 	return resultDirection;
 	
