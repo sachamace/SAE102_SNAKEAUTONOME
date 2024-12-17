@@ -57,9 +57,9 @@
 
 // valeur renvoyer en fonction de la distance
 #define CHEMIN_HAUT 2
-#define CHEMIN_BAS 2
-#define CHEMIN_GAUCHE 3
-#define CHEMIN_DROITE 4
+#define CHEMIN_BAS 4
+#define CHEMIN_GAUCHE 5
+#define CHEMIN_DROITE 3
 #define CHEMIN_POMME 1
 // définition d'un type pour le plateau : tPlateau
 // Attention, pour que les indices du tableau 2D (qui commencent à 0) coincident
@@ -147,13 +147,12 @@ int main(){
 	dessinerSerpent(lesX, lesY);
 	disable_echo();
 	direction = DROITE;
-	compare = compareDistancePomme(lesPommesX[nbPommes] , lesPommesY[nbPommes] , nbPommes);
-	meilleurDistance = calculDistance(lesX , lesY , lesPommesX[nbPommes], lesPommesY[nbPommes],compare,nbPommes);
+	compare = compareDistancePomme(lesPommesX, lesPommesY, nbPommes);
+	meilleurDistance = calculDistance(lesX , lesY , lesPommesX, lesPommesY,compare,nbPommes);
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
 	do {
-
 		if(meilleurDistance == CHEMIN_HAUT){
 			if(teleporter){
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
@@ -192,8 +191,8 @@ int main(){
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee){
-			compare = compareDistancePomme(lesPommesX[nbPommes] , lesPommesY[nbPommes] , nbPommes);
-			meilleurDistance = calculDistance(lesX , lesY , lesPommesX[nbPommes], lesPommesY[nbPommes],compare,nbPommes);
+			compare = compareDistancePomme(lesPommesX, lesPommesY, nbPommes);
+			meilleurDistance = calculDistance(lesX , lesY , lesPommesX, lesPommesY,compare,nbPommes);
             nbPommes++;
 			gagne = (nbPommes==NB_POMMES);
 			if (!gagne){

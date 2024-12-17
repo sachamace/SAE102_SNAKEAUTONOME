@@ -83,7 +83,7 @@ void dessinerSerpent(int lesX[], int lesY[]);
 void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY);
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
 int min(int a, int b);
-int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
+int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme, bool * teleporter);
 void gotoxy(int x, int y);
 int kbhit();
