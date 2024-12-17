@@ -183,7 +183,7 @@ int main(){
 		else{
 			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
 		}
-
+		
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
 		deplacement ++;
 
