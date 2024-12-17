@@ -2,7 +2,7 @@
 * @file version1.c
 * @brief Jeu snake autonome SAE1.01
 * @author Noah Le Goff, Sacha Mace
-* @version 2.0
+* @version 1.0
 * @date 10/12/24
 *
 * Le serpent avance automatiquement et peut changer de direction automatiquement
@@ -56,8 +56,7 @@
 typedef char tPlateau[LARGEUR_PLATEAU+1][HAUTEUR_PLATEAU+1];
 
 const int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
-const int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
-
+const int lesPommesY[NB_POMMES] = { 8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
 
 
 void initPlateau(tPlateau plateau);
@@ -67,7 +66,6 @@ void afficher(int, int, char);
 void effacer(int x, int y);
 void dessinerSerpent(int lesX[], int lesY[]);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme);
-int calculDistance(int lesX[] , int lesY[],bool compare);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -80,17 +78,13 @@ void enable_echo();
 int main(){
 	// départ du calcul du temps CPU
 	clock_t begin = clock();
+
+	// Total des déplacements
+	int deplacement = 0;
+
 	// 2 tableaux contenant les positions des éléments qui constituent le serpent
     int lesX[TAILLE];
 	int lesY[TAILLE];
-
-	// représente le booléen qui va chnager en fonction de la distance entre la pomme et le serpent 
-
-	bool result;
-
-	//représente un booléen qui va comparer la position initiale de la tête du serpent par rapport à la pomme pour que la fonction calculDistance est moins de calcul à faire.
-
-	bool compare;
 
 	// représente la touche frappée par l'utilisateur : touche de direction ou pour l'arrêt
 	char touche;
@@ -101,9 +95,10 @@ int main(){
 	// le plateau de jeu
 	tPlateau lePlateau;
 
-	bool collision = false;
+	bool collision=false;
 	bool gagne = false;
 	bool pommeMangee = false;
+	bool collisionSerpent = false;
 
 	// compteur de pommes mangées
 	int nbPommes = 0;
@@ -131,24 +126,71 @@ int main(){
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
-	do{
-		
-		result = calculDistance(lesX , lesY, compare);
+	do {
 		// Condition pour que le serpent change de direction automatiquement
 		if (lesPommesX[nbPommes] < lesX[0]){
 			direction = GAUCHE;
+			for (int i = 1; i < TAILLE; i++) {
+				if (lesX[0] - 1 == lesX[i]) {
+					collisionSerpent = true;
+				}
+			}
+			if(collisionSerpent){
+				if(lesPommesY[nbPommes] > lesY[0]){
+					direction = BAS;
+				}
+				else{
+					direction = HAUT;
+				}
+			}
+			collisionSerpent = false;
 		}
-		else if (lesPommesX[nbPommes] > lesX[0] ){
-			direction = DROITE;
+		else if (lesPommesX[nbPommes] > lesX[0]){
+			if(!collision){
+				direction = DROITE;
+			}
+			else{
+				if(lesPommesY[nbPommes] < lesY[0]){
+					direction = HAUT;
+				}
+				else{
+					direction = BAS;
+				}
+			}
 		}
-		else if (lesPommesY[nbPommes] < lesY[0] ){
-			direction = HAUT;
+		else if (lesPommesY[nbPommes] < lesY[0]){
+			if(!collision){
+				direction = HAUT;
+			}
+			else{
+				if(lesPommesX[nbPommes] < lesX[0]){
+					direction = GAUCHE;
+				}
+				else{
+					direction = DROITE;
+				}
+			}
 		}
-		else if (lesPommesY[nbPommes] > lesY[0] ){
+		else if (lesPommesY[nbPommes] > lesY[0]){
 			direction = BAS;
+			for (int i = 1; i < TAILLE; i++) {
+				if (lesY[0] + 1 == lesY[i] ) {
+					collisionSerpent = true;
+				}
+			}
+			if(collisionSerpent){
+				if(lesPommesX[nbPommes] > lesX[0]){
+					direction = DROITE;
+				}
+				else{
+					direction = GAUCHE;
+				}
+			}
+			collisionSerpent = false;
 		}
 
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee);
+		deplacement ++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee){
@@ -168,13 +210,14 @@ int main(){
 				}
 			}
 		}
-	}while (touche != STOP && !collision && !gagne);
+	} while (touche != STOP && !collision && !gagne);
     enable_echo();
 	gotoxy(1, HAUTEUR_PLATEAU+1);
 
 	clock_t end = clock();
 	double tmpsCPU = ((end - begin)*1.0) / CLOCKS_PER_SEC;
-	printf("Temps CPU = %.3f secondes\n",tmpsCPU);
+	printf( "Temps CPU = %.3f secondes\n",tmpsCPU);
+	printf( "Le serpent c'est déplacer %d fois\n", deplacement);
 
 	return EXIT_SUCCESS;
 }
@@ -199,19 +242,15 @@ void initPlateau(tPlateau plateau){
 	// première ligne
 	for (int i=1 ; i<=LARGEUR_PLATEAU ; i++){
 		plateau[i][1] = BORDURE;
-		plateau[LARGEUR_PLATEAU/2][1] = VIDE;
 	}
 	// lignes intermédiaires
 	for (int j=1 ; j<=HAUTEUR_PLATEAU ; j++){
 			plateau[1][j] = BORDURE;
-			plateau[1][HAUTEUR_PLATEAU / 2] = VIDE;
 			plateau[LARGEUR_PLATEAU][j] = BORDURE;
-			plateau[LARGEUR_PLATEAU][HAUTEUR_PLATEAU/ 2] = VIDE;
 		}
 	// dernière ligne
 	for (int i=1 ; i<=LARGEUR_PLATEAU ; i++){
 		plateau[i][HAUTEUR_PLATEAU] = BORDURE;
-		plateau[LARGEUR_PLATEAU / 2 ][HAUTEUR_PLATEAU] = VIDE;
 	}
 }
 
@@ -292,7 +331,6 @@ void dessinerSerpent(int lesX[], int lesY[]){
 * @param collision de type bool, vérifie si il y a une collision
 * @param pomme de type bool, vérifie si une pomme est mangée
 */
-
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool * collision, bool * pomme){
 	// efface le dernier élément avant d'actualiser la position de tous les 
 	// élémentds du serpent avant de le  redessiner et détecte une
@@ -318,17 +356,6 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
 			lesX[0] = lesX[0] - 1;
 			break;
 	}
-	// Vérification des téléportations sur les bords
-	if (lesX[0] == 0 && lesY[0] == HAUTEUR_PLATEAU / 2) {
-        lesX[0] = LARGEUR_PLATEAU - 1;
-    } else if (lesX[0] == LARGEUR_PLATEAU && lesY[0] == HAUTEUR_PLATEAU / 2) {
-        lesX[0] = 1;
-    } else if (lesY[0] == 0 && lesX[0] == LARGEUR_PLATEAU / 2) {
-        lesY[0] = HAUTEUR_PLATEAU - 1;
-    } else if (lesY[0] == HAUTEUR_PLATEAU && lesX[0] == LARGEUR_PLATEAU / 2) {
-        lesY[0] = 1;
-    }
-
 	*pomme = false;
 	// détection d'une "collision" avec une pomme
 	if (plateau[lesX[0]][lesY[0]] == POMME){
@@ -340,19 +367,11 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
 	else if (plateau[lesX[0]][lesY[0]] == BORDURE){
 		*collision = true;
 	}
-	// Vérification des collisions avec le corps du serpent
-    for (int i = 1; i < TAILLE; i++) {
-        if (lesX[0] == lesX[i] && lesY[0] == lesY[i]) {
-            *adr_collision = true;
-        }
-    }
+	
    	dessinerSerpent(lesX, lesY);
 }
 
-int calculDistance(int lesX[] , int lesY[], bool compare)
-{
-	bool resultDirection;
-}
+
 
 /************************************************/
 /*				 FONCTIONS UTILITAIRES 			*/
