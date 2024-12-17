@@ -47,6 +47,14 @@
 #define VIDE ' '
 #define POMME '6'
 
+#define POS_TP_X_HAUT 40
+#define POS_TP_Y_HAUT 0
+#define POS_TP_X_GAUCHE 0
+#define POS_TP_Y_GAUCHE 20
+#define POS_TP_X_BAS 40
+#define POS_TP_Y_BAS 80
+#define POS_TP_X_DROITE 40
+#define POS_TP_Y_DROITE 40
 
 // définition d'un type pour le plateau : tPlateau
 // Attention, pour que les indices du tableau 2D (qui commencent à 0) coincident
@@ -372,11 +380,16 @@ int compareDistancePomme(int lesPommesX[] , int lesPommesY[] , int nbPommes)
 
 int calculDistance(int lesX[] , int lesY[], int lesPommesX[],int lesPommesY[],int compare)
 {
-	int resultDirection , distanceWE , distanceEW , distanceP , distanceNS , distanceSN;
+	int resultDirection , distanceGD , distanceDG, distancePomme , distanceHB , distanceBH;
 	switch(compare){
 		case 1 :
-			distanceP
+			resultDirection = 1;
+			break;
+		case 2:
+			distanceHB = (lesX[0])
+			distanceGD = 
 	}
+	return resultDirection;
 	
 }
 /************************************************/
