@@ -371,14 +371,14 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 	int dx = objectifX - lesX[0]; // Différence en X
 	int dy = objectifY - lesY[0]; // Différence en Y
 
-	// Essayer de se déplacer dans la direction horizontale (Gauche/Droite)
-	if (dx != 0)
+	// Essayer de se déplacer dans la direction verticale
+	if (dy != 0)
 	{
-		*direction = (dx > 0) ? DROITE : GAUCHE;
+		*direction = (dy > 0) ? BAS : HAUT;
 		if (verifierCollision(lesX, lesY, plateau, *direction))
 		{
-			// Si collision, essayer la direction verticale (Haut/Bas)
-			*direction = (dy > 0) ? BAS : HAUT;
+			// Si collision, essayer la direction horizontale
+			*direction = (dx > 0) ? DROITE : GAUCHE;
 			if (verifierCollision(lesX, lesY, plateau, *direction))
 			{
 				// Si collision, essayer l'autre direction horizontale
@@ -391,18 +391,24 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 			}
 		}
 	}
-	// Si pas de déplacement horizontal possible, essayer verticalement
-	else if (dy != 0)
+	
+	// Si pas de déplacement horizontal possible, essayer horizontale
+	else if (dx != 0)
 	{
-		*direction = (dy > 0) ? BAS : HAUT;
+		*direction = (dx > 0) ? DROITE : GAUCHE;
 		if (verifierCollision(lesX, lesY, plateau, *direction))
 		{
-			// Si collision, essayer la direction horizontale (Gauche/Droite)
-			*direction = (dx > 0) ? DROITE : GAUCHE;
+			// Si collision, essayer la direction verticale
+			*direction = (dy > 0) ? BAS : HAUT;
 			if (verifierCollision(lesX, lesY, plateau, *direction))
 			{
 				// Si collision, essayer l'autre direction verticale
 				*direction = (dy > 0) ? HAUT : BAS;
+				if (verifierCollision(lesX, lesY, plateau, *direction))
+				{
+					// Si collision, essayer l'autre direction horizontale
+					*direction = (dx > 0) ? GAUCHE : DROITE;
+				}
 			}
 		}
 	}
