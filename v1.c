@@ -118,7 +118,7 @@ int main()
 	bool teleporter = false;
 
 	// compteur de pommes mangées
-	int nbPommes = 0;
+	int nbPommesMangee = 0;
 
 	// initialisation de la position du serpent : positionnement de la
 	// tête en (X_INITIAL, Y_INITIAL), puis des anneaux à sa gauche
@@ -134,7 +134,7 @@ int main()
 	dessinerPlateau(lePlateau);
 
 	srand(time(NULL));
-	ajouterPomme(lePlateau, nbPommes);
+	ajouterPomme(lePlateau, nbPommesMangee);
 
 	// initialisation : le serpent se dirige vers la DROITE
 	dessinerSerpent(lesX, lesY);
@@ -142,7 +142,7 @@ int main()
 	direction = DROITE;
 
 	// calcul la meilleur distance à l'initialisation
-	int meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+	int meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
@@ -153,7 +153,7 @@ int main()
 		{
 			if (teleporter)
 			{
-				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 			}
 			else
 			{
@@ -164,7 +164,7 @@ int main()
 		{
 			if (teleporter)
 			{
-				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 			}
 			else
 			{
@@ -175,7 +175,7 @@ int main()
 		{
 			if (teleporter)
 			{
-				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 			}
 			else
 			{
@@ -186,7 +186,7 @@ int main()
 		{
 			if (teleporter)
 			{
-				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 			}
 			else
 			{
@@ -195,7 +195,7 @@ int main()
 		}
 		else // sinon se dirige uniquement vers la pomme
 		{
-			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommes], lesPommesY[nbPommes]);
+			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 		}
 
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
@@ -204,13 +204,13 @@ int main()
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
 		if (pommeMangee)
 		{
-			nbPommes++;
-			gagne = (nbPommes == NB_POMMES);
+			nbPommesMangee++;
+			gagne = (nbPommesMangee == NB_POMMES);
 			teleporter = false; // remet en false pour pouvoir se retéléporter après avoir manger une pomme
 			if (!gagne)
 			{
-				ajouterPomme(lePlateau, nbPommes);
-				meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommes], lesPommesY[nbPommes]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
+				ajouterPomme(lePlateau, nbPommesMangee);
+				meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
 				pommeMangee = false;
 			}
 		}
