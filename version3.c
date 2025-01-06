@@ -54,6 +54,9 @@
 #define BORDURE '#'
 #define VIDE ' '
 #define POMME '6'
+// pavés
+#define NB_PAVES 6
+#define TAILLE_PAVE 5
 // valeur renvoyer en fonction de la distance
 #define CHEMIN_HAUT 1
 #define CHEMIN_BAS 2
@@ -70,7 +73,11 @@ typedef char tPlateau[LARGEUR_PLATEAU + 1][HAUTEUR_PLATEAU + 1];
 
 // coordonnées des pommes
 const int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
-const int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
+const int lesPommesY[NB_POMMES] = { 8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
+
+// coordonnées des pavés
+const int lesPavesX[NB_PAVES] = { 3, 74, 3, 74, 38, 38};
+const int lesPavesY[NB_PAVES] = { 3, 3, 34, 34, 21, 15};
 
 void initPlateau(tPlateau plateau);
 void dessinerPlateau(tPlateau plateau);
@@ -278,6 +285,21 @@ void initPlateau(tPlateau plateau)
 		plateau[i][HAUTEUR_PLATEAU] = BORDURE;
 		plateau[LARGEUR_PLATEAU / 2][HAUTEUR_PLATEAU] = VIDE; // trou du bas
 	}
+
+	for (int p = 0; p < NB_PAVES; p++) {
+		int xPave, yPave;
+		bool positionValide;
+		// Générer des coordonnées aléatoires pour le pavé
+		xPave = lesPavesX[p];
+    	yPave = lesPavesY[p];;
+
+		// Dessiner le pavé sur le plateau
+        for (int i = 0; i < TAILLE_PAVE; i++) {
+            for (int j = 0; j < TAILLE_PAVE; j++) {
+                plateau[xPave + i][yPave + j] = BORDURE;  // Dessine le pavé
+            }
+        }
+    }
 }
 
 /**
