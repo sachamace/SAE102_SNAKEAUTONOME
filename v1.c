@@ -391,7 +391,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 			}
 		}
 	}
-	
+
 	// Si pas de déplacement horizontal possible, essayer horizontale
 	else if (dx != 0)
 	{
