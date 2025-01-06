@@ -40,7 +40,7 @@
 // nombre de pommes à manger pour gagner
 #define NB_POMMES 10
 // temporisation entre deux déplacements du serpent (en microsecondes)
-#define ATTENTE 200000
+#define ATTENTE 60000
 // caractères pour représenter le serpent
 #define CORPS 'X'
 #define TETE 'O'
@@ -234,7 +234,7 @@ int main()
 
 	// afficher les performances du programme
 	printf("Temps CPU = %.3f secondes\n", tmpsCPU);
-	printf("Le serpent c'est déplacer %d fois\n", deplacement);
+	printf("Le serpent s'est déplacé %d fois\n", deplacement);
 
 	return EXIT_SUCCESS;
 }
