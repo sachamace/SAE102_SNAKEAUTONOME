@@ -8,7 +8,7 @@
  * Le serpent avance automatiquement et peut changer de direction automatiquement
  * Le serpent va donc se diriger vers les pommes sans toucher d'obstacle.
  * Le jeu se termine lorsque la touche 'a' est pressée ou lorsque le serpent a manger 10 pommes.
- *
+ * 
  */
 
 /* Fichiers inclus */
@@ -54,6 +54,9 @@
 #define BORDURE '#'
 #define VIDE ' '
 #define POMME '6'
+// pavés
+#define NB_PAVES 6
+#define TAILLE_PAVE 5
 // valeur renvoyer en fonction de la distance
 #define CHEMIN_HAUT 1
 #define CHEMIN_BAS 2
@@ -70,7 +73,11 @@ typedef char tPlateau[LARGEUR_PLATEAU + 1][HAUTEUR_PLATEAU + 1];
 
 // coordonnées des pommes
 const int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
-const int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
+const int lesPommesY[NB_POMMES] = { 8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
+
+// coordonnées des pavés
+const int lesPavesX[NB_PAVES] = { 3, 74, 3, 74, 38, 38};
+const int lesPavesY[NB_PAVES] = { 3, 3, 34, 34, 21, 15};
 
 void initPlateau(tPlateau plateau);
 void dessinerPlateau(tPlateau plateau);
@@ -79,6 +86,7 @@ void afficher(int, int, char);
 void effacer(int x, int y);
 void dessinerSerpent(int lesX[], int lesY[]);
 void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY);
+void directionSerpentVersPomme(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY);
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter);
@@ -195,7 +203,7 @@ int main()
 		}
 		else // sinon se dirige uniquement vers la pomme
 		{
-			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
+			directionSerpentVersPomme(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 		}
 
 		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
@@ -278,6 +286,21 @@ void initPlateau(tPlateau plateau)
 		plateau[i][HAUTEUR_PLATEAU] = BORDURE;
 		plateau[LARGEUR_PLATEAU / 2][HAUTEUR_PLATEAU] = VIDE; // trou du bas
 	}
+
+	for (int p = 0; p < NB_PAVES; p++) {
+		int xPave, yPave;
+		bool positionValide;
+		// Générer des coordonnées aléatoires pour le pavé
+		xPave = lesPavesX[p];
+    	yPave = lesPavesY[p];;
+
+		// Dessiner le pavé sur le plateau
+        for (int i = 0; i < TAILLE_PAVE; i++) {
+            for (int j = 0; j < TAILLE_PAVE; j++) {
+                plateau[xPave + i][yPave + j] = BORDURE;  // Dessine le pavé
+            }
+        }
+    }
 }
 
 /**
@@ -392,7 +415,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 		}
 	}
 
-	// Si pas de déplacement horizontal possible, essayer horizontale
+	// Si pas de déplacement verticale possible, essayer horizontale
 	else if (dx != 0)
 	{
 		*direction = (dx > 0) ? DROITE : GAUCHE;
@@ -424,7 +447,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
 {
 	// définition des variables
-	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme;
+	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme,resultat;
 
 	// calcul la distance pour chaque chemin du serpent vers la pomme
 	passageTrouGauche = abs(lesX[0] - TROU_GAUCHE_X) + abs(lesY[0] - TROU_GAUCHE_Y) + abs(pommeX - TROU_DROITE_X) + abs(pommeY - TROU_DROITE_Y);
@@ -437,24 +460,25 @@ int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
 	if (passageDirectPomme <= passageTrouHaut && passageDirectPomme <= passageTrouBas &&
 		passageDirectPomme <= passageTrouGauche && passageDirectPomme <= passageTrouDroit) // chemin direct vers la pomme sans passer dans un trou
 	{
-		return CHEMIN_POMME;
+		resultat = CHEMIN_POMME;
 	}
 	else if (passageTrouHaut <= passageTrouBas && passageTrouHaut <= passageTrouGauche && passageTrouHaut <= passageTrouDroit) // chemin vers la pomme en passant par le trou du haut
 	{
-		return CHEMIN_HAUT;
+		resultat = CHEMIN_HAUT;
 	}
 	else if (passageTrouBas <= passageTrouGauche && passageTrouBas <= passageTrouDroit) // chemin vers la pomme en passant par le trou du bas
 	{
-		return CHEMIN_BAS;
+		resultat = CHEMIN_BAS;
 	}
 	else if (passageTrouGauche <= passageTrouDroit) // chemin vers la pomme en passant par le trou de gauche
 	{
-		return CHEMIN_GAUCHE;
+		resultat = CHEMIN_GAUCHE;
 	}
 	else // chemin vers la pomme en passant par le trou de droite
 	{
-		return CHEMIN_DROITE;
+		resultat = CHEMIN_DROITE;
 	}
+	return resultat;
 }
 
 /**
