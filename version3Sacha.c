@@ -482,9 +482,9 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 	}
 }
 bool calculAvecPavesPommeSerpent(int lesX[] , int lesY[]){
-	bool changement = true;
+	bool changement = false;
 	for(int i = 0 ; i < NB_PAVES ; i++){
-		if(lesX[0] - 1 == lesPavesX[NB_PAVES]){
+		if(lesX[0] - 1 == lesPavesX[i]){
 			changement = true;
 		}
 	}
