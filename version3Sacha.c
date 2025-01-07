@@ -451,11 +451,11 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 				if (verifierCollision(lesX, lesY, plateau, *direction))
 				{
 					// Si collision, essayer l'autre direction verticale
-					*direction = (dy > 0) ? HAUT : BAS;
+					*direction = (dx > 0) ? GAUCHE : DROITE;
 					if (verifierCollision(lesX, lesY, plateau, *direction))
 					{
 						// Si collision, essayer l'autre direction horizontale
-						*direction = (dx > 0) ? GAUCHE : DROITE;
+						*direction = (dy > 0) ? HAUT : BAS;
 					}
 				}
 			}
@@ -466,15 +466,15 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 			if (verifierCollision(lesX, lesY, plateau, *direction))
 			{
 				// Si collision, essayer la direction horizontale
-				*direction = (dx > 0) ? DROITE : GAUCHE;
+				*direction = (dx > 0) ? GAUCHE : DROITE;
 				if (verifierCollision(lesX, lesY, plateau, *direction))
 				{
 					// Si collision, essayer l'autre direction horizontale
-					*direction = (dx > 0) ? GAUCHE : DROITE;
+						*direction = (dy > 0) ? HAUT : BAS;
 					if (verifierCollision(lesX, lesY, plateau, *direction))
 					{
 						// Si collision, essayer l'autre direction verticale
-						*direction = (dy > 0) ? HAUT : BAS;
+						*direction = (dx > 0) ? DROITE : GAUCHE;
 					}
 				}
 			}
@@ -482,7 +482,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 	}
 }
 bool calculAvecPavesPommeSerpent(int lesX[] , int lesY[]){
-	bool changement = false;
+	bool changement = true;
 	for(int i = 0 ; i < NB_PAVES ; i++){
 		if(lesX[0] - 1 == lesPavesX[NB_PAVES]){
 			changement = true;
