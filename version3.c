@@ -88,7 +88,7 @@ void dessinerSerpent(int lesX[], int lesY[]);
 void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY, bool changement);
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY);
-void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter);
+void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool projeter);
 void gotoxy(int x, int y);
 void projeterSerpent(int lesX[], int lesY[], tPlateau plateau, int objectifX, int objectifY, bool *changement);
 int kbhit();
@@ -125,6 +125,7 @@ int main()
 	bool pommeMangee = false;
 	bool teleporter = false;
 	bool changement = false;
+	bool projeter = false;
 
 	// compteur de pommes mangées
 	int nbPommesMangee = 0;
@@ -204,11 +205,10 @@ int main()
 		}
 		else // sinon se dirige uniquement vers la pomme
 		{
-			projeterSerpent(lesX, lesY, lePlateau, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], &changement);
 			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement);
 		}
 
-		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
+		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter, projeter);
 		deplacement++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
@@ -222,6 +222,9 @@ int main()
 			{
 				ajouterPomme(lePlateau, nbPommesMangee);
 				meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
+				if (meilleurDistance == CHEMIN_POMME){
+					projeterSerpent(lesX, lesY, lePlateau, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], &changement);
+				}
 				pommeMangee = false;
 			}
 		}
@@ -488,13 +491,24 @@ void projeterSerpent(int lesX[], int lesY[], tPlateau plateau, int objectifX, in
 	bool collision = false;
 	bool pommeMangee = false;
 	bool teleporter = false;
+	bool projeter = true;
 	char direction;
-	int i = 0;
+	int deplacement_1 =0;
+	int deplacement_2 =0;
 
 	direction = DROITE;
+	// Copier la position actuelle du serpent dans une copie virtuelle
+		for (int i = 0; i < TAILLE; i++) {
+			projeterLesX[i] = lesX[i];
+			projeterLesY[i] = lesY[i];
+		}
 	do{
-		directionSerpentVersObjectif(lesX, lesY, plateau, &direction, objectifX, objectifY, changement);
+		
+		directionSerpentVersObjectif(projeterLesX, projeterLesY, plateau, &direction, objectifX, objectifY, changement);
+		progresser(projeterLesX, projeterLesY, direction, plateau, &collision, &pommeMangee, &teleporter, projeter);
+		deplacement_1++;
 	}while(!pommeMangee);
+	system("clear");
 }
 
 
@@ -602,7 +616,7 @@ bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionP
  * @param pomme de type bool, vérifie si une pomme est mangée
  * @param teleporter de type bool, vérifie si le serpent s'est téléporter
  */
-void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter)
+void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool projeter)
 {
 	// efface le dernier élément avant d'actualiser la position de tous les
 	// élémentds du serpent avant de le  redessiner et détecte une
@@ -669,7 +683,11 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
 	{
 		*collision = true;
 	}
-	dessinerSerpent(lesX, lesY);
+
+	if (!projeter){
+		dessinerSerpent(lesX, lesY);
+	}
+	
 }
 
 /************************************************/
