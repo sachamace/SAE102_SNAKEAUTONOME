@@ -398,6 +398,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 
 	// Essayer de se déplacer dans la direction verticale
 	if(!changement){
+		// Essayer de se déplacer dans la direction verticale
 		if (dy != 0)
 		{
 			*direction = (dy > 0) ? BAS : HAUT;
@@ -450,25 +451,6 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 				if (verifierCollision(lesX, lesY, plateau, *direction))
 				{
 					// Si collision, essayer l'autre direction verticale
-					*direction = (dx > 0) ? GAUCHE : DROITE;
-					if (verifierCollision(lesX, lesY, plateau, *direction))
-					{
-						// Si collision, essayer l'autre direction horizontale
-						*direction = (dy > 0) ? HAUT : BAS;
-					}
-				}
-			}
-		}
-		else if (dx != 0)
-		{
-			*direction = (dx > 0) ? DROITE : GAUCHE;
-			if (verifierCollision(lesX, lesY, plateau, *direction))
-			{
-				// Si collision, essayer la direction verticale
-				*direction = (dy > 0) ? BAS : HAUT;
-				if (verifierCollision(lesX, lesY, plateau, *direction))
-				{
-					// Si collision, essayer l'autre direction verticale
 					*direction = (dy > 0) ? HAUT : BAS;
 					if (verifierCollision(lesX, lesY, plateau, *direction))
 					{
@@ -478,10 +460,29 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 				}
 			}
 		}
+		else if (dy != 0)
+		{
+			*direction = (dy > 0) ? BAS : HAUT;
+			if (verifierCollision(lesX, lesY, plateau, *direction))
+			{
+				// Si collision, essayer la direction horizontale
+				*direction = (dx > 0) ? DROITE : GAUCHE;
+				if (verifierCollision(lesX, lesY, plateau, *direction))
+				{
+					// Si collision, essayer l'autre direction horizontale
+					*direction = (dx > 0) ? GAUCHE : DROITE;
+					if (verifierCollision(lesX, lesY, plateau, *direction))
+					{
+						// Si collision, essayer l'autre direction verticale
+						*direction = (dy > 0) ? HAUT : BAS;
+					}
+				}
+			}
+		}
 	}
 }
 bool calculAvecPavesPommeSerpent(int lesX[] , int lesY[]){
-	bool changement = true;
+	bool changement = false;
 	for(int i = 0 ; i < NB_PAVES ; i++){
 		if(lesX[0] - 1 == lesPavesX[NB_PAVES]){
 			changement = true;
