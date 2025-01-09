@@ -89,6 +89,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter);
+int calculerDistancePommePave(int pommeX, int pommeY, int paveX, int paveY);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -479,8 +480,8 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 	}
 }
 
-bool calculAvecPavesPommeSerpent(nbPommesMangee){
-	if((lesPommesX[]<LARGEUR_PLATEAU && lesPommesX>lesPavesX+4) && ){
+bool calculAvecPavesPommeSerpent(int nbPommesMangee){
+	if((lesPommesX[nbPommesMangee]<LARGEUR_PLATEAU && lesPommesX[nbPommesMangee]>lesPavesX+4) && ){
 
 	}
 	return changement;
@@ -494,6 +495,44 @@ bool calculAvecPavesPommeSerpent(nbPommesMangee){
  * @param pommeY de type int, Entrée : les coordonnées des pommes en Y
  */
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
+{
+	// définition des variables
+	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme, resultat;
+
+	// calcul la distance pour chaque chemin du serpent vers la pomme
+	passageTrouGauche = abs(lesX[0] - TROU_GAUCHE_X) + abs(lesY[0] - TROU_GAUCHE_Y) + abs(pommeX - TROU_DROITE_X) + abs(pommeY - TROU_DROITE_Y);
+	passageTrouDroit = abs(lesX[0] - TROU_DROITE_X) + abs(lesY[0] - TROU_DROITE_Y) + abs(pommeX - TROU_GAUCHE_X) + abs(pommeY - TROU_GAUCHE_Y);
+	passageTrouHaut = abs(lesX[0] - TROU_HAUT_X) + abs(lesY[0] - TROU_HAUT_Y) + abs(pommeX - TROU_BAS_X) + abs(pommeY - TROU_BAS_Y);
+	passageTrouBas = abs(lesX[0] - TROU_BAS_X) + abs(lesY[0] - TROU_BAS_Y) + abs(pommeX - TROU_HAUT_X) + abs(pommeY - TROU_HAUT_Y);
+	passageDirectPomme = abs(lesX[0] - pommeX) + abs(lesY[0] - pommeY);
+
+	// compare les résultats pour obtenir le meilleur chemin
+	if (passageDirectPomme <= passageTrouHaut && passageDirectPomme <= passageTrouBas &&
+		passageDirectPomme <= passageTrouGauche && passageDirectPomme <= passageTrouDroit) // chemin direct vers la pomme sans passer dans un trou
+	{
+		resultat = CHEMIN_POMME;
+	}
+	else if (passageTrouHaut <= passageTrouBas && passageTrouHaut <= passageTrouGauche && passageTrouHaut <= passageTrouDroit) // chemin vers la pomme en passant par le trou du haut
+	{
+		resultat = CHEMIN_HAUT;
+	}
+	else if (passageTrouBas <= passageTrouGauche && passageTrouBas <= passageTrouDroit) // chemin vers la pomme en passant par le trou du bas
+	{
+		resultat = CHEMIN_BAS;
+	}
+	else if (passageTrouGauche <= passageTrouDroit) // chemin vers la pomme en passant par le trou de gauche
+	{
+		resultat = CHEMIN_GAUCHE;
+	}
+	else // chemin vers la pomme en passant par le trou de droite
+	{
+		resultat = CHEMIN_DROITE;
+	}
+
+	return resultat;
+}
+
+int calculerDistancePommePave(int pommeX, int pommeY, int paveX, int paveY)
 {
 	// définition des variables
 	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme, resultat;
