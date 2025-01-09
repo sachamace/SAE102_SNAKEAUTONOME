@@ -162,6 +162,7 @@ int main()
 		{
 			if (teleporter)
 			{
+				changement = calculAvecPavesPommeSerpent(lesX ,lesY);
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee],changement);
 			}
 			else
@@ -173,6 +174,7 @@ int main()
 		{
 			if (teleporter)
 			{
+				changement = calculAvecPavesPommeSerpent(lesX ,lesY);
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee],changement);
 			}
 			else
@@ -184,6 +186,7 @@ int main()
 		{
 			if (teleporter)
 			{
+				changement = calculAvecPavesPommeSerpent(lesX ,lesY);
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee],changement);
 			}
 			else
@@ -195,6 +198,7 @@ int main()
 		{
 			if (teleporter)
 			{
+				changement = calculAvecPavesPommeSerpent(lesX ,lesY);
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee],changement);
 			}
 			else
