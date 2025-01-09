@@ -88,8 +88,9 @@ void dessinerSerpent(int lesX[], int lesY[]);
 void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY, bool changement);
 bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionProchaine);
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY);
-void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter);
-int calculerDistancePommePave(int pommeX, int pommeY, int paveX, int paveY);
+void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool *sortieDuTrou);
+int calculerDistancePommePave(int pommeX, int pommeY);
+bool calculAvecPavesPommeSerpent(int lesX[], int lesY[], int nbPommesMangee, int meilleureDistancePave);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -124,6 +125,7 @@ int main()
 	bool gagne = false;
 	bool pommeMangee = false;
 	bool teleporter = false;
+	bool sortieDuTrou = false;
 	bool changement = false;
 
 	// compteur de pommes mangées
@@ -152,16 +154,22 @@ int main()
 
 	// calcul la meilleur distance à l'initialisation
 	int meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
+	int meilleureDistancePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
 	do
 	{
+		if(sortieDuTrou){
+			changement = calculAvecPavesPommeSerpent(lesX, lesY, nbPommesMangee, meilleureDistancePave);
+			sortieDuTrou = false;
+		}
 		// choisis la direction en fonction de la meilleur distance
 		if (meilleurDistance == CHEMIN_HAUT) // se dirige vers le trou du haut puis quand il s'est téléporter avance vers la pomme
 		{
 			if (teleporter)
 			{
+				
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement);
 			}
 			else
@@ -173,6 +181,7 @@ int main()
 		{
 			if (teleporter)
 			{
+				
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement);
 			}
 			else
@@ -184,6 +193,7 @@ int main()
 		{
 			if (teleporter)
 			{
+				
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement);
 			}
 			else
@@ -195,6 +205,7 @@ int main()
 		{
 			if (teleporter)
 			{
+				
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement);
 			}
 			else
@@ -207,7 +218,7 @@ int main()
 			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement);
 		}
 
-		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter);
+		progresser(lesX, lesY, direction, lePlateau, &collision, &pommeMangee, &teleporter, &sortieDuTrou);
 		deplacement++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
@@ -221,6 +232,10 @@ int main()
 			{
 				ajouterPomme(lePlateau, nbPommesMangee);
 				meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
+				meilleureDistancePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
+				if(meilleurDistance == CHEMIN_POMME){
+					changement = calculAvecPavesPommeSerpent(lesX, lesY, nbPommesMangee, meilleureDistancePave);
+				}
 				pommeMangee = false;
 			}
 		}
@@ -480,10 +495,55 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 	}
 }
 
-bool calculAvecPavesPommeSerpent(int nbPommesMangee){
-	if((lesPommesX[nbPommesMangee]<LARGEUR_PLATEAU && lesPommesX[nbPommesMangee]>lesPavesX+4) && ){
+bool calculAvecPavesPommeSerpent(int lesX[], int lesY[], int nbPommesMangee, int meilleureDistancePave){
+	// if(meilleureDistancePave == 0){
+	// 	if((lesPommesX[nbPommesMangee]<LARGEUR_PLATEAU && lesPommesX[nbPommesMangee]>lesPavesX+4) && ){
 
+	// 	}
+	// }
+	int changement  = false;
+
+	if (lesPavesX[meilleureDistancePave]+2 < lesX[0] && lesPavesY[meilleureDistancePave]+2 > lesY[0] && lesPavesX[meilleureDistancePave]+2 > LARGEUR_PLATEAU/2){ // Sortie trou droit, pave en bas a droite du plateau
+		if(lesPommesX[nbPommesMangee] < lesPavesX[meilleureDistancePave] + 5 && lesPommesY[nbPommesMangee] < lesPavesY[meilleureDistancePave] + 5){ // si pomme dans la diagonale suprieure gauche du pave
+			changement = true;
+		}
 	}
+	else if (lesPavesX[meilleureDistancePave]+2 < lesX[0] && lesPavesY[meilleureDistancePave]+2 < lesY[0] && lesPavesX[meilleureDistancePave]+2 > LARGEUR_PLATEAU/2){ // Sortie trou droit, pave en haut a droite du plateau
+		if(lesPommesX[nbPommesMangee] < lesPavesX[meilleureDistancePave] + 5 && lesPommesY[nbPommesMangee] > lesPavesY[meilleureDistancePave] - 1){ // si pomme dans la diagonale infrieure gauche du pave
+			changement = true;
+		}
+	}
+	else if (lesPavesX[meilleureDistancePave]+2 > lesX[0] && lesPavesY[meilleureDistancePave]+2 > lesY[0] && lesPavesX[meilleureDistancePave]+2 < LARGEUR_PLATEAU/2){ // Sortie trou gauche, pave en bas a gauche  du plateau
+		if(lesPommesX[nbPommesMangee] > lesPavesX[meilleureDistancePave] -1 && lesPommesY[nbPommesMangee] < lesPavesY[meilleureDistancePave] + 5){ // si pomme dans la diagonale suprieure droite du pave
+			changement = true;
+		}
+	}
+	else if (lesPavesX[meilleureDistancePave]+2 > lesX[0] && lesPavesY[meilleureDistancePave]+2 < lesY[0] && lesPavesX[meilleureDistancePave]+2 < LARGEUR_PLATEAU/2){ // Sortie trou gauche, pave en haut a gauche du plateau
+		if(lesPommesX[nbPommesMangee] > lesPavesX[meilleureDistancePave] -1 && lesPommesY[nbPommesMangee] > lesPavesY[meilleureDistancePave] - 1){ // si pomme dans la diagonale infrieure droite du pave
+			changement = true;
+		}
+	}
+	else if (lesPavesX[meilleureDistancePave]+2 > lesX[0] && lesPavesY[meilleureDistancePave]+2 > lesY[0] && lesPavesY[meilleureDistancePave]+2 < HAUTEUR_PLATEAU/2){ // Sortie trou haut, pave en haut a droite du plateau
+		if(lesPommesX[nbPommesMangee] < lesPavesX[meilleureDistancePave] + 5 && lesPommesY[nbPommesMangee] > lesPavesY[meilleureDistancePave] - 1){ // si pomme dans la diagonale infrieure gauche du pave
+			changement = true;
+		}
+	}
+	else if (lesPavesX[meilleureDistancePave]+2 < lesX[0] && lesPavesY[meilleureDistancePave]+2 > lesY[0] && lesPavesY[meilleureDistancePave]+2 < HAUTEUR_PLATEAU/2){ // Sortie trou haut, pave en haut a gauche du plateau
+		if(lesPommesX[nbPommesMangee] > lesPavesX[meilleureDistancePave] - 1 && lesPommesY[nbPommesMangee] > lesPavesY[meilleureDistancePave] - 1){ // si pomme dans la diagonale infrieure droite du pave
+			changement = true;
+		}
+	}
+	else if (lesPavesX[meilleureDistancePave]+2 > lesX[0] && lesPavesY[meilleureDistancePave]+2 < lesY[0] && lesPavesY[meilleureDistancePave]+2 > HAUTEUR_PLATEAU/2){ // Sortie trou bas, pave en bas a droite du plateau
+		if(lesPommesX[nbPommesMangee] < lesPavesX[meilleureDistancePave] + 5 && lesPommesY[nbPommesMangee] < lesPavesY[meilleureDistancePave] +5){ // si pomme dans la diagonale suprieure gauche du pave
+			changement = true;
+		}
+	}
+	else if (lesPavesX[meilleureDistancePave]+2 < lesX[0] && lesPavesY[meilleureDistancePave]+2 < lesY[0] && lesPavesY[meilleureDistancePave]+2 > HAUTEUR_PLATEAU/2){ // Sortie trou bas, pave en bas a gauche du plateau
+		if(lesPommesX[nbPommesMangee] > lesPavesX[meilleureDistancePave] - 1 && lesPommesY[nbPommesMangee] < lesPavesY[meilleureDistancePave] +5){ // si pomme dans la diagonale suprieure droite du pave
+			changement = true;
+		}
+	}
+
 	return changement;
 }
 
@@ -532,42 +592,29 @@ int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
 	return resultat;
 }
 
-int calculerDistancePommePave(int pommeX, int pommeY, int paveX, int paveY)
+int calculerDistancePommePave(int pommeX, int pommeY)
 {
 	// définition des variables
-	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme, resultat;
+	int distancePommePave, meilleureDistancePommePave, iMeilleureDistancePave;
+
+	meilleureDistancePommePave = 0;
+	iMeilleureDistancePave = 0;
 
 	// calcul la distance pour chaque chemin du serpent vers la pomme
-	passageTrouGauche = abs(lesX[0] - TROU_GAUCHE_X) + abs(lesY[0] - TROU_GAUCHE_Y) + abs(pommeX - TROU_DROITE_X) + abs(pommeY - TROU_DROITE_Y);
-	passageTrouDroit = abs(lesX[0] - TROU_DROITE_X) + abs(lesY[0] - TROU_DROITE_Y) + abs(pommeX - TROU_GAUCHE_X) + abs(pommeY - TROU_GAUCHE_Y);
-	passageTrouHaut = abs(lesX[0] - TROU_HAUT_X) + abs(lesY[0] - TROU_HAUT_Y) + abs(pommeX - TROU_BAS_X) + abs(pommeY - TROU_BAS_Y);
-	passageTrouBas = abs(lesX[0] - TROU_BAS_X) + abs(lesY[0] - TROU_BAS_Y) + abs(pommeX - TROU_HAUT_X) + abs(pommeY - TROU_HAUT_Y);
-	passageDirectPomme = abs(lesX[0] - pommeX) + abs(lesY[0] - pommeY);
-
-	// compare les résultats pour obtenir le meilleur chemin
-	if (passageDirectPomme <= passageTrouHaut && passageDirectPomme <= passageTrouBas &&
-		passageDirectPomme <= passageTrouGauche && passageDirectPomme <= passageTrouDroit) // chemin direct vers la pomme sans passer dans un trou
-	{
-		resultat = CHEMIN_POMME;
-	}
-	else if (passageTrouHaut <= passageTrouBas && passageTrouHaut <= passageTrouGauche && passageTrouHaut <= passageTrouDroit) // chemin vers la pomme en passant par le trou du haut
-	{
-		resultat = CHEMIN_HAUT;
-	}
-	else if (passageTrouBas <= passageTrouGauche && passageTrouBas <= passageTrouDroit) // chemin vers la pomme en passant par le trou du bas
-	{
-		resultat = CHEMIN_BAS;
-	}
-	else if (passageTrouGauche <= passageTrouDroit) // chemin vers la pomme en passant par le trou de gauche
-	{
-		resultat = CHEMIN_GAUCHE;
-	}
-	else // chemin vers la pomme en passant par le trou de droite
-	{
-		resultat = CHEMIN_DROITE;
+	for (int i = 0; i<NB_PAVES; i++){
+		distancePommePave = abs(pommeX - (lesPavesX[i] + 2)) + abs(pommeY - (lesPavesY[i] + 2));
+		if (meilleureDistancePommePave == 0){
+			meilleureDistancePommePave = distancePommePave;
+			iMeilleureDistancePave = i;
+		}
+		else if(distancePommePave < meilleureDistancePommePave){
+			meilleureDistancePommePave = distancePommePave;
+			iMeilleureDistancePave = i;
+		}
 	}
 
-	return resultat;
+	
+	return iMeilleureDistancePave;
 }
 
 /**
@@ -629,7 +676,7 @@ bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionP
  * @param pomme de type bool, vérifie si une pomme est mangée
  * @param teleporter de type bool, vérifie si le serpent s'est téléporter
  */
-void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter)
+void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool *sortieDuTrou)
 {
 	// efface le dernier élément avant d'actualiser la position de tous les
 	// élémentds du serpent avant de le  redessiner et détecte une
@@ -665,21 +712,25 @@ void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *
 		{
 			lesX[0] = LARGEUR_PLATEAU; // faire apparaitre à gauche
 			*teleporter = true;		   // quand le serpent traverse le trou
+			*sortieDuTrou = true;
 		}
 		else if (lesX[0] > LARGEUR_PLATEAU)
 		{
 			lesX[0] = 1;		// faire apparaitre à droite
 			*teleporter = true; // quand le serpent traverse le trou
+			*sortieDuTrou = true;
 		}
 		else if (lesY[0] <= 0)
 		{
 			lesY[0] = HAUTEUR_PLATEAU; // faire apparaitre en haut
 			*teleporter = true;		   // quand le serpent traverse le trou
+			*sortieDuTrou = true;
 		}
 		else if (lesY[0] > HAUTEUR_PLATEAU)
 		{
 			lesY[0] = 1;		// faire apparaitre en bas
 			*teleporter = true; // quand le serpent traverse le trou
+			*sortieDuTrou = true;
 		}
 	}
 
