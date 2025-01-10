@@ -158,6 +158,7 @@ int main()
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
+	system("https://youtu.be/fboNTcjJ8bo?si=3h0fKVVzDCh976z3");
 	do
 	{
 		if(sortieDuTrou){
