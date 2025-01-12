@@ -1,9 +1,9 @@
 /**
- * @file version2.c
+ * @file version3.c
  * @brief Jeu snake autonome SAE1.02
  * @author Noah Le Goff, Sacha Mace
- * @version 2.0
- * @date 18/12/24
+ * @version 3.0
+ * @date 12/01/25
  *
  * Le serpent avance automatiquement et peut changer de direction automatiquement
  * Le serpent va donc se diriger vers les pommes sans toucher d'obstacle.
@@ -90,7 +90,8 @@ bool verifierCollision(int lesX[], int lesY[], tPlateau plateau, char directionP
 int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY);
 void progresser(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool *sortieDuTrou);
 int calculerDistancePommePave(int pommeX, int pommeY);
-bool calculAvecPavesPommeSerpent(int lesX[], int lesY[], int nbPommesMangee, int meilleureDistancePave);
+bool changementDirection(int lesX[], int lesY[], int nbPommesMangee, int meilleureDistancePave);
+bool changementDirectionCasIsole(int lesX[] , int lesY[]);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -152,20 +153,21 @@ int main()
 	disable_echo();
 	direction = DROITE;
 
-	// calcul la meilleur distance à l'initialisation
-	int meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
-	int meilleureDistancePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
+	// calcul les meilleures distance à l'initialisation
+	int meilleureDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
+	int DistancePommePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
 	do
 	{
+		// appel la fonction qui s'occupe de changer ou non le mode de direction à la sortie d'un trou
 		if(sortieDuTrou){
-			changement = calculAvecPavesPommeSerpent(lesX, lesY, nbPommesMangee, meilleureDistancePave);
+			changement = changementDirection(lesX, lesY, nbPommesMangee, DistancePommePave);
 			sortieDuTrou = false;
 		}
 		// choisis la direction en fonction de la meilleur distance
-		if (meilleurDistance == CHEMIN_HAUT) // se dirige vers le trou du haut puis quand il s'est téléporter avance vers la pomme
+		if (meilleureDistance == CHEMIN_HAUT) // se dirige vers le trou du haut puis quand il s'est téléporter avance vers la pomme
 		{
 			if (teleporter)
 			{
@@ -177,7 +179,7 @@ int main()
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_HAUT_X, TROU_HAUT_Y, changement);
 			}
 		}
-		else if (meilleurDistance == CHEMIN_BAS) // se dirige vers le trou du bas puis quand il s'est téléporter avance vers la pomme
+		else if (meilleureDistance == CHEMIN_BAS) // se dirige vers le trou du bas puis quand il s'est téléporter avance vers la pomme
 		{
 			if (teleporter)
 			{
@@ -189,7 +191,7 @@ int main()
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_BAS_X, TROU_BAS_Y, changement);
 			}
 		}
-		else if (meilleurDistance == CHEMIN_GAUCHE) // se dirige vers le trou de gauche puis quand il s'est téléporter avance vers la pomme
+		else if (meilleureDistance == CHEMIN_GAUCHE) // se dirige vers le trou de gauche puis quand il s'est téléporter avance vers la pomme
 		{
 			if (teleporter)
 			{
@@ -201,7 +203,7 @@ int main()
 				directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, TROU_GAUCHE_X, TROU_GAUCHE_Y, changement);
 			}
 		}
-		else if (meilleurDistance == CHEMIN_DROITE) // se dirige vers le trou de droite puis quand il s'est téléporter avance vers la pomme
+		else if (meilleureDistance == CHEMIN_DROITE) // se dirige vers le trou de droite puis quand il s'est téléporter avance vers la pomme
 		{
 			if (teleporter)
 			{
@@ -215,6 +217,7 @@ int main()
 		}
 		else // sinon se dirige uniquement vers la pomme
 		{
+			changement = changementDirectionCasIsole(lesX, lesY);
 			directionSerpentVersObjectif(lesX, lesY, lePlateau, &direction, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement);
 		}
 
@@ -231,10 +234,10 @@ int main()
 			if (!gagne)
 			{
 				ajouterPomme(lePlateau, nbPommesMangee);
-				meilleurDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
-				meilleureDistancePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
-				if(meilleurDistance == CHEMIN_POMME){
-					changement = calculAvecPavesPommeSerpent(lesX, lesY, nbPommesMangee, meilleureDistancePave);
+				meilleureDistance = calculerDistance(lesX, lesY, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
+				DistancePommePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul quel pave est le plus proche de la pomme
+				if(meilleureDistance == CHEMIN_POMME){
+					changement = changementDirection(lesX, lesY, nbPommesMangee, DistancePommePave);
 				}
 				pommeMangee = false;
 			}
@@ -403,6 +406,7 @@ void dessinerSerpent(int lesX[], int lesY[])
  * @param direction de type char, Entrée/Sortie : la direction du serpent attribuée aux touches 'z' 'q' 's' 'd'
  * @param objectifX de type int, Entrée : les coordonnées en X de l'objecif à atteindre
  * @param objectifY de type int, Entrée : les coordonnées en Y de l'objecif à atteindre
+ * @param changement de type bool, Entre : l'etat (true/false) de la variable "changement" dans le main
  */
 void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char *direction, int objectifX, int objectifY, bool changement)
 {
@@ -410,6 +414,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 	int dx = objectifX - lesX[0]; // Différence en X
 	int dy = objectifY - lesY[0]; // Différence en Y
 
+	//si pas de changement, priorise la verticalitée
 	if(!changement){
 		// Essayer de se déplacer dans la direction verticale
 		if (dy != 0)
@@ -453,7 +458,10 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 			}
 		}
 	}
+
+	//si changement, priorise l'horizontalité
 	else if(changement){
+		// Essayer de se déplacer dans la direction horizontale
 		if (dx != 0)
 		{
 			*direction = (dx > 0) ? DROITE : GAUCHE;
@@ -473,6 +481,7 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 				}
 			}
 		}
+		// Si pas de déplacement horizontale possible, essayer verticale
 		else if (dy != 0)
 		{
 			*direction = (dy > 0) ? BAS : HAUT;
@@ -495,12 +504,14 @@ void directionSerpentVersObjectif(int lesX[], int lesY[], tPlateau plateau, char
 	}
 }
 
-bool calculAvecPavesPommeSerpent(int lesX[], int lesY[], int nbPommesMangee, int meilleureDistancePave){
-	// if(meilleureDistancePave == 0){
-	// 	if((lesPommesX[nbPommesMangee]<LARGEUR_PLATEAU && lesPommesX[nbPommesMangee]>lesPavesX+4) && ){
-
-	// 	}
-	// }
+/**
+ * @brief Fonction qui renvoit "changement" en false ou true selon ou est situé la pomme part rapport au pavé et selon l'emplacement du serpent
+ * @param lesX de type int tableau, Entrée : le tableau des X de N élément
+ * @param lesY de type int tableau, Entrée : le tableau des Y de N élément
+ * @param nbPommesMangee de type int, Entrée : le nombre de pommes mangés
+ * @param meilleureDistancePave de type int, Entrée : l'indice du pavée le plus proche de la pomme
+ * */
+bool changementDirection(int lesX[], int lesY[], int nbPommesMangee, int meilleureDistancePave){
 	int changement  = false;
 
 	if (lesPavesX[meilleureDistancePave]+2 < lesX[0] && lesPavesY[meilleureDistancePave]+2 > lesY[0] && lesPavesX[meilleureDistancePave]+2 > LARGEUR_PLATEAU/2){ // Sortie trou droit, pave en bas a droite du plateau
@@ -544,6 +555,22 @@ bool calculAvecPavesPommeSerpent(int lesX[], int lesY[], int nbPommesMangee, int
 		}
 	}
 
+	return changement;
+}
+
+
+/**
+ * @brief Fonction qui regarde si un pavé arrive devant le serpent
+ * @param lesX de type int tableau, Entrée : le tableau des X de N élément
+ * @param lesY de type int tableau, Entrée : le tableau des Y de N élément
+ */
+bool changementDirectionCasIsole(int lesX[] , int lesY[]){ // Utile dans un seul cas, si la coordonne du pave se trouve en lesX[0] - 1
+	bool changement = false;
+	for(int i = 0 ; i < NB_PAVES ; i++){
+		if(lesX[0] - 1 == lesPavesX[i]){// si la coordonne du pave se trouve en lesX[0] - 1 alors change de mode de direction
+			changement = true;
+		}
+	}
 	return changement;
 }
 
@@ -592,6 +619,11 @@ int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
 	return resultat;
 }
 
+/**
+ * @brief Vérifie si le prochain déplacement du serpent dans la direction spécifiée entraîne une collision.
+ * @param pommeX de type int, Entrée : coordonnée de la pomme en X
+ * @param pommeY de type int, Entrée : coordonnée de la pomme en Y
+ */
 int calculerDistancePommePave(int pommeX, int pommeY)
 {
 	// définition des variables
@@ -602,7 +634,7 @@ int calculerDistancePommePave(int pommeX, int pommeY)
 
 	// calcul la distance pour chaque chemin du serpent vers la pomme
 	for (int i = 0; i<NB_PAVES; i++){
-		distancePommePave = abs(pommeX - (lesPavesX[i] + 2)) + abs(pommeY - (lesPavesY[i] + 2));
+		distancePommePave = abs(pommeX - (lesPavesX[i] + 2)) + abs(pommeY - (lesPavesY[i] + 2)); //distance par rapport au centre du pavé
 		if (meilleureDistancePommePave == 0){
 			meilleureDistancePommePave = distancePommePave;
 			iMeilleureDistancePave = i;
