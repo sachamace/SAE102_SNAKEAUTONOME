@@ -27,9 +27,9 @@
 #define HAUTEUR_PLATEAU 40
 // position initiale de la tête du serpent
 #define X_INITIAL_SERPENT1 40
-#define Y_INITIAL_SERPENT1 14
+#define Y_INITIAL_SERPENT1 13
 #define X_INITIAL_SERPENT2 40
-#define Y_INITIAL_SERPENT2 26
+#define Y_INITIAL_SERPENT2 27
 // position des trous
 #define TROU_HAUT_X 40
 #define TROU_HAUT_Y 0
@@ -158,7 +158,7 @@ int main()
 
 	for (int i = 0; i < TAILLE; i++)
 	{
-		lesX_S2[i] = X_INITIAL_SERPENT1 - i;
+		lesX_S2[i] = X_INITIAL_SERPENT1 + i;
 		lesY_S2[i] = Y_INITIAL_SERPENT2;
 	}
 
