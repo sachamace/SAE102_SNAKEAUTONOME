@@ -87,7 +87,8 @@ void dessinerPlateau(tPlateau plateau);
 void ajouterPomme(tPlateau plateau, int iPomme);
 void afficher(int, int, char);
 void effacer(int x, int y);
-void dessinerSerpent(int lesX[], int lesY[]);
+void dessinerSerpent1(int lesX[], int lesY[]);
+void dessinerSerpent2(int lesX[], int lesY[]);
 void directionSerpentVersObjectif1(int lesX_S1[], int lesY_S1[], int lesX_S2[], int lesY_S2[], tPlateau plateau, char *direction, int objectifX, int objectifY, bool changement);
 void directionSerpentVersObjectif2(int lesX_S2[], int lesY_S2[], int lesX_S1[], int lesY_S1[], tPlateau plateau, char *direction, int objectifX, int objectifY, bool changement);
 bool verifierCollision1(int lesX_S1[], int lesY_S1[], int lesX_S2[], int lesY_S2[], tPlateau plateau, char directionProchaine);
@@ -171,8 +172,8 @@ int main()
 	ajouterPomme(lePlateau, nbPommesMangee);
 
 	// initialisation : le serpent se dirige vers la DROITE
-	dessinerSerpent(lesX_S1, lesY_S1);
-	dessinerSerpent(lesX_S2, lesY_S2);
+	dessinerSerpent1(lesX_S1, lesY_S1);
+	dessinerSerpent2(lesX_S2, lesY_S2);
 
 	disable_echo();
 	direction_S1 = DROITE;
@@ -191,12 +192,6 @@ int main()
 		if(sortieDuTrou_S1){
 			changement_S1 = changementDirection(lesX_S1, lesY_S1, nbPommesMangee, DistancePommePave);
 			sortieDuTrou_S1 = false;
-		}
-
-		// appel la fonction qui s'occupe de changer ou non le mode de direction à la sortie d'un trou
-		if(sortieDuTrou_S2){
-			changement_S2 = changementDirection(lesX_S2, lesY_S2, nbPommesMangee, DistancePommePave);
-			sortieDuTrou_S2 = false;
 		}
 
 		// choisis la direction en fonction de la meilleur distance
@@ -254,7 +249,17 @@ int main()
 			directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement_S1);
 		}
 
+		progresser1(lesX_S1, lesY_S1, direction_S1, lePlateau, &collision_S1, &pommeMangee_S1, &teleporter_S1, &sortieDuTrou_S1);
+		deplacement_S1++;
 
+
+
+
+		// appel la fonction qui s'occupe de changer ou non le mode de direction à la sortie d'un trou
+		if(sortieDuTrou_S2){
+			changement_S2 = changementDirection(lesX_S2, lesY_S2, nbPommesMangee, DistancePommePave);
+			sortieDuTrou_S2 = false;
+		}
 
 		// choisis la direction en fonction de la meilleur distance
 		if (meilleureDistance_S2 == CHEMIN_HAUT) // se dirige vers le trou du haut puis quand il s'est téléporter avance vers la pomme
@@ -311,11 +316,7 @@ int main()
 			directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement_S2);
 		}
 
-
-
-		progresser1(lesX_S1, lesY_S1, direction_S1, lePlateau, &collision_S1, &pommeMangee_S1, &teleporter_S1, &sortieDuTrou_S1);
 		progresser2(lesX_S2, lesY_S2, direction_S2, lePlateau, &collision_S2, &pommeMangee_S2, &teleporter_S2, &sortieDuTrou_S2);
-		deplacement_S1++;
 		deplacement_S2++;
 
 		// Ajoute une pomme au compteur de pomme quand elle est mangée et arrete le jeu si score atteint 10
@@ -491,7 +492,7 @@ void effacer(int x, int y)
  * @param lesX de type int tableau, Entrée : le tableau des X de N élément
  * @param lesY de type int tableau, Entrée : le tableau des Y de N élément
  */
-void dessinerSerpent(int lesX[], int lesY[])
+void dessinerSerpent1(int lesX[], int lesY[])
 {
 	// affiche les anneaux puis la tête
 	for (int i = 1; i < TAILLE; i++)
@@ -499,6 +500,21 @@ void dessinerSerpent(int lesX[], int lesY[])
 		afficher(lesX[i], lesY[i], CORPS);
 	}
 	afficher(lesX[0], lesY[0], TETE_SERPENT1);
+}
+
+/**
+ * @brief Procédure qui affiche le corps du serpent, 'O' pour la tete et 'X' pour le corps
+ * @param lesX de type int tableau, Entrée : le tableau des X de N élément
+ * @param lesY de type int tableau, Entrée : le tableau des Y de N élément
+ */
+void dessinerSerpent2(int lesX[], int lesY[])
+{
+	// affiche les anneaux puis la tête
+	for (int i = 1; i < TAILLE; i++)
+	{
+		afficher(lesX[i], lesY[i], CORPS);
+	}
+	afficher(lesX[0], lesY[0], TETE_SERPENT2);
 }
 
 /**
@@ -1037,7 +1053,7 @@ void progresser1(int lesX[], int lesY[], char direction, tPlateau plateau, bool 
 		*collision = true;
 	}
 
-	dessinerSerpent(lesX, lesY);
+	dessinerSerpent1(lesX, lesY);
 }
 
 /**
@@ -1123,7 +1139,7 @@ void progresser2(int lesX[], int lesY[], char direction, tPlateau plateau, bool 
 		*collision = true;
 	}
 
-	dessinerSerpent(lesX, lesY);
+	dessinerSerpent2(lesX, lesY);
 }
 
 /************************************************/
