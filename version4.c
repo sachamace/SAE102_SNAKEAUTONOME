@@ -98,7 +98,7 @@ void progresser1(int lesX[], int lesY[], char direction, tPlateau plateau, bool 
 void progresser2(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool *sortieDuTrou);
 int calculerDistancePommePave(int pommeX, int pommeY);
 bool changementDirection(int lesX[], int lesY[], int nbPommesMangee, int meilleureDistancePave);
-bool changementDirectionCasIsole(int lesX[] , int lesY[]);
+bool changementDirectionCasIsole(int lesX_S2[], int lesY_S2[], int lesX_S1[], int lesY_S1[]);
 void gotoxy(int x, int y);
 int kbhit();
 void disable_echo();
@@ -789,13 +789,18 @@ bool changementDirection(int lesX[], int lesY[], int nbPommesMangee, int meilleu
  * @param lesX de type int tableau, Entrée : le tableau des X de N élément
  * @param lesY de type int tableau, Entrée : le tableau des Y de N élément
  */
-bool changementDirectionCasIsole(int lesX[] , int lesY[]){ // Utile dans un seul cas, si la coordonne du pave se trouve en lesX[0] - 1
+bool changementDirectionCasIsole(int lesX_S2[], int lesY_S2[], int lesX_S1[], int lesY_S1[]){ // Utile dans un seul cas, si la coordonne du pave se trouve en lesX[0] - 1
 	bool changement = false;
-	// for(int i = 0 ; i < NB_PAVES ; i++){
-	// 	if(lesX[0] - 1 == lesPavesX[i]){// si la coordonne du pave se trouve en lesX[0] - 1 alors change de mode de direction
-	// 		changement = true;
-	// 	}
-	// }
+	int nouvelleX = lesX_S2[0]; // projeter des coordonnées en X
+	int nouvelleY = lesY_S2[0]; // projeter des coordonnées en Y
+
+	for (int i = 0; i < TAILLE; i++)
+	{
+		if ((lesX_S1[i] + 2 == nouvelleX && lesY_S1[i] == nouvelleY) || (lesX_S2[i] == nouvelleX && lesY_S2[i] == nouvelleY))
+		{
+			return true; // Collision avec le corps du serpent
+		}
+	}
 	return changement;
 }
 
