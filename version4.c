@@ -93,7 +93,8 @@ void directionSerpentVersObjectif1(int lesX_S1[], int lesY_S1[], int lesX_S2[], 
 void directionSerpentVersObjectif2(int lesX_S2[], int lesY_S2[], int lesX_S1[], int lesY_S1[], tPlateau plateau, char *direction, int objectifX, int objectifY, bool changement);
 bool verifierCollision1(int lesX_S1[], int lesY_S1[], int lesX_S2[], int lesY_S2[], tPlateau plateau, char directionProchaine);
 bool verifierCollision2(int lesX_S2[], int lesY_S2[], int lesX_S1[], int lesY_S1[], tPlateau plateau, char directionProchaine);
-int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY);
+int calculerDistance1(int lesX_S1[], int lesY_S1[], int pommeX, int pommeY);
+int calculerDistance2(int lesX_S2[], int lesY_S2[], int pommeX, int pommeY);
 void progresser1(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool *sortieDuTrou);
 void progresser2(int lesX[], int lesY[], char direction, tPlateau plateau, bool *collision, bool *pomme, bool *teleporter, bool *sortieDuTrou);
 int calculerDistancePommePave(int pommeX, int pommeY);
@@ -148,6 +149,8 @@ int main()
 
 	// compteur de pommes mangées
 	int nbPommesMangee = 0;
+	int nbPommesMangee_S1 = 0;
+	int nbPommesMangee_S2 = 0;
 
 	// initialisation de la position du serpent 1 : positionnement de la
 	// tête en (X_INITIAL_SERPENT1, Y_INITIAL_SERPENT1), puis des anneaux à sa gauche
@@ -180,14 +183,15 @@ int main()
 	direction_S2 = GAUCHE;
 
 	// calcul les meilleures distance à l'initialisation
-	int meilleureDistance_S1 = calculerDistance(lesX_S1, lesY_S1, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
-	int meilleureDistance_S2 = calculerDistance(lesX_S2, lesY_S2, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
+	int meilleureDistance_S1 = calculerDistance1(lesX_S1, lesY_S1, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
+	int meilleureDistance_S2 = calculerDistance2(lesX_S2, lesY_S2, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 	int DistancePommePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]);
 
 	// boucle de jeu. Arret si touche STOP, si collision avec une bordure ou
 	// si toutes les pommes sont mangées
 	do
 	{
+		printf("Serpent 1 : %d\n", meilleureDistance_S1);
 		// appel la fonction qui s'occupe de changer ou non le mode de direction à la sortie d'un trou
 		if(sortieDuTrou_S1){
 			changement_S1 = changementDirection(lesX_S1, lesY_S1, nbPommesMangee, DistancePommePave);
@@ -245,7 +249,6 @@ int main()
 		}
 		else // sinon se dirige uniquement vers la pomme
 		{
-			changement_S1 = changementDirectionCasIsole(lesX_S1, lesY_S1);
 			directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement_S1);
 		}
 
@@ -255,6 +258,7 @@ int main()
 
 
 
+		printf("Serpent 2 : %d\n", meilleureDistance_S2);
 		// appel la fonction qui s'occupe de changer ou non le mode de direction à la sortie d'un trou
 		if(sortieDuTrou_S2){
 			changement_S2 = changementDirection(lesX_S2, lesY_S2, nbPommesMangee, DistancePommePave);
@@ -312,7 +316,7 @@ int main()
 		}
 		else // sinon se dirige uniquement vers la pomme
 		{
-			changement_S2 = changementDirectionCasIsole(lesX_S2, lesY_S2);
+			changement_S2 = changementDirectionCasIsole(lesX_S2, lesY_S2, lesX_S1, lesY_S1);
 			directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee], changement_S2);
 		}
 
@@ -323,23 +327,33 @@ int main()
 		if (pommeMangee_S1 || pommeMangee_S2)
 		{
 			nbPommesMangee++;
+			if (pommeMangee_S1){
+				nbPommesMangee_S1++;
+			}
+			else if (pommeMangee_S2){
+				nbPommesMangee_S2++;
+			}
 			gagne = (nbPommesMangee == NB_POMMES);
 			teleporter_S1 = false; // remet en false pour pouvoir se retéléporter après avoir manger une pomme
 			teleporter_S2 = false;
 			changement_S1 = false;
 			changement_S2 = false;
+			sortieDuTrou_S1 = false;
+			sortieDuTrou_S2 = false;
 
 			if (!gagne)
 			{
 				ajouterPomme(lePlateau, nbPommesMangee);
-				meilleureDistance_S1 = calculerDistance(lesX_S1, lesY_S1, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
-				meilleureDistance_S2 = calculerDistance(lesX_S2, lesY_S2, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
+				meilleureDistance_S1 = calculerDistance1(lesX_S1, lesY_S1, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
+				meilleureDistance_S2 = calculerDistance2(lesX_S2, lesY_S2, lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul la meilleur position après l'apparition d'une nouvelle pomme
 				DistancePommePave = calculerDistancePommePave(lesPommesX[nbPommesMangee], lesPommesY[nbPommesMangee]); // recalcul quel pave est le plus proche de la pomme
 				if(meilleureDistance_S1 == CHEMIN_POMME){
 					changement_S1 = changementDirection(lesX_S1, lesY_S1, nbPommesMangee, DistancePommePave);
+					teleporter_S1 = true;
 				}
 				if(meilleureDistance_S2 == CHEMIN_POMME){
 					changement_S2 = changementDirection(lesX_S2, lesY_S2, nbPommesMangee, DistancePommePave);
+					teleporter_S2 = true;
 				}
 				pommeMangee_S1 = false;
 				pommeMangee_S2 = false;
@@ -365,8 +379,8 @@ int main()
 
 	// afficher les performances du programme
 	printf("Temps CPU = %.3f secondes\n", tmpsCPU);
-	printf("Le serpent c'est déplacer %d fois\n", deplacement_S1);
-	printf("Le serpent c'est déplacer %d fois\n", deplacement_S2);
+	printf("Le serpent c'est déplacer %d fois et à mangé %d pommes\n", deplacement_S1, nbPommesMangee_S1);
+	printf("Le serpent c'est déplacer %d fois et à mangé %d pommes\n", deplacement_S2, nbPommesMangee_S2);
 
 	return EXIT_SUCCESS;
 }
@@ -811,17 +825,62 @@ bool changementDirectionCasIsole(int lesX_S2[], int lesY_S2[], int lesX_S1[], in
  * @param pommeX de type int, Entrée : les coordonnées des pommes en X
  * @param pommeY de type int, Entrée : les coordonnées des pommes en Y
  */
-int calculerDistance(int lesX[], int lesY[], int pommeX, int pommeY)
+int calculerDistance1(int lesX_S1[], int lesY_S1[], int pommeX, int pommeY)
 {
 	// définition des variables
 	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme, resultat;
 
 	// calcul la distance pour chaque chemin du serpent vers la pomme
-	passageTrouGauche = abs(lesX[0] - TROU_GAUCHE_X) + abs(lesY[0] - TROU_GAUCHE_Y) + abs(pommeX - TROU_DROITE_X) + abs(pommeY - TROU_DROITE_Y);
-	passageTrouDroit = abs(lesX[0] - TROU_DROITE_X) + abs(lesY[0] - TROU_DROITE_Y) + abs(pommeX - TROU_GAUCHE_X) + abs(pommeY - TROU_GAUCHE_Y);
-	passageTrouHaut = abs(lesX[0] - TROU_HAUT_X) + abs(lesY[0] - TROU_HAUT_Y) + abs(pommeX - TROU_BAS_X) + abs(pommeY - TROU_BAS_Y);
-	passageTrouBas = abs(lesX[0] - TROU_BAS_X) + abs(lesY[0] - TROU_BAS_Y) + abs(pommeX - TROU_HAUT_X) + abs(pommeY - TROU_HAUT_Y);
-	passageDirectPomme = abs(lesX[0] - pommeX) + abs(lesY[0] - pommeY);
+	passageTrouGauche = abs(lesX_S1[0] - TROU_GAUCHE_X) + abs(lesY_S1[0] - TROU_GAUCHE_Y) + abs(pommeX - TROU_DROITE_X) + abs(pommeY - TROU_DROITE_Y);
+	passageTrouDroit = abs(lesX_S1[0] - TROU_DROITE_X) + abs(lesY_S1[0] - TROU_DROITE_Y) + abs(pommeX - TROU_GAUCHE_X) + abs(pommeY - TROU_GAUCHE_Y);
+	passageTrouHaut = abs(lesX_S1[0] - TROU_HAUT_X) + abs(lesY_S1[0] - TROU_HAUT_Y) + abs(pommeX - TROU_BAS_X) + abs(pommeY - TROU_BAS_Y);
+	passageTrouBas = abs(lesX_S1[0] - TROU_BAS_X) + abs(lesY_S1[0] - TROU_BAS_Y) + abs(pommeX - TROU_HAUT_X) + abs(pommeY - TROU_HAUT_Y);
+	passageDirectPomme = abs(lesX_S1[0] - pommeX) + abs(lesY_S1[0] - pommeY);
+
+	// compare les résultats pour obtenir le meilleur chemin
+	if (passageDirectPomme <= passageTrouHaut && passageDirectPomme <= passageTrouBas &&
+		passageDirectPomme <= passageTrouGauche && passageDirectPomme <= passageTrouDroit) // chemin direct vers la pomme sans passer dans un trou
+	{
+		resultat = CHEMIN_POMME;
+	}
+	else if (passageTrouHaut <= passageTrouBas && passageTrouHaut <= passageTrouGauche && passageTrouHaut <= passageTrouDroit) // chemin vers la pomme en passant par le trou du haut
+	{
+		resultat = CHEMIN_HAUT;
+	}
+	else if (passageTrouBas <= passageTrouGauche && passageTrouBas <= passageTrouDroit) // chemin vers la pomme en passant par le trou du bas
+	{
+		resultat = CHEMIN_BAS;
+	}
+	else if (passageTrouGauche <= passageTrouDroit) // chemin vers la pomme en passant par le trou de gauche
+	{
+		resultat = CHEMIN_GAUCHE;
+	}
+	else // chemin vers la pomme en passant par le trou de droite
+	{
+		resultat = CHEMIN_DROITE;
+	}
+
+	return resultat;
+}
+
+/**
+ * @brief Fonction qui calcule puis renvoie le chemin le plus rapide
+ * @param lesX de type int tableau, Entrée : le tableau des X de N élément
+ * @param lesY de type int tableau, Entrée : le tableau des Y de N élément
+ * @param pommeX de type int, Entrée : les coordonnées des pommes en X
+ * @param pommeY de type int, Entrée : les coordonnées des pommes en Y
+ */
+int calculerDistance2(int lesX_S2[], int lesY_S2[], int pommeX, int pommeY)
+{
+	// définition des variables
+	int passageTrouGauche, passageTrouDroit, passageTrouHaut, passageTrouBas, passageDirectPomme, resultat;
+
+	// calcul la distance pour chaque chemin du serpent vers la pomme
+	passageTrouGauche = abs(lesX_S2[0] - TROU_GAUCHE_X) + abs(lesY_S2[0] - TROU_GAUCHE_Y) + abs(pommeX - TROU_DROITE_X) + abs(pommeY - TROU_DROITE_Y);
+	passageTrouDroit = abs(lesX_S2[0] - TROU_DROITE_X) + abs(lesY_S2[0] - TROU_DROITE_Y) + abs(pommeX - TROU_GAUCHE_X) + abs(pommeY - TROU_GAUCHE_Y);
+	passageTrouHaut = abs(lesX_S2[0] - TROU_HAUT_X) + abs(lesY_S2[0] - TROU_HAUT_Y) + abs(pommeX - TROU_BAS_X) + abs(pommeY - TROU_BAS_Y);
+	passageTrouBas = abs(lesX_S2[0] - TROU_BAS_X) + abs(lesY_S2[0] - TROU_BAS_Y) + abs(pommeX - TROU_HAUT_X) + abs(pommeY - TROU_HAUT_Y);
+	passageDirectPomme = abs(lesX_S2[0] - pommeX) + abs(lesY_S2[0] - pommeY);
 
 	// compare les résultats pour obtenir le meilleur chemin
 	if (passageDirectPomme <= passageTrouHaut && passageDirectPomme <= passageTrouBas &&
