@@ -191,7 +191,7 @@ int main()
 	// si toutes les pommes sont mangées
 	do
 	{
-		printf("Serpent 1 : %d\n", meilleureDistance_S1);
+		printf("Serpent 1 : %d ", meilleureDistance_S1);
 		// appel la fonction qui s'occupe de changer ou non le mode de direction à la sortie d'un trou
 		if(sortieDuTrou_S1){
 			changement_S1 = changementDirection(lesX_S1, lesY_S1, nbPommesMangee, DistancePommePave);
@@ -220,7 +220,7 @@ int main()
 			}
 			else
 			{
-				directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, TROU_HAUT_X, TROU_HAUT_Y, changement_S1);
+				directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, TROU_BAS_X, TROU_BAS_Y, changement_S1);
 			}
 		}
 		else if (meilleureDistance_S1 == CHEMIN_GAUCHE) // se dirige vers le trou de gauche puis quand il s'est téléporter avance vers la pomme
@@ -232,7 +232,7 @@ int main()
 			}
 			else
 			{
-				directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, TROU_HAUT_X, TROU_HAUT_Y, changement_S1);
+				directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, TROU_GAUCHE_X, TROU_GAUCHE_Y, changement_S1);
 			}
 		}
 		else if (meilleureDistance_S1 == CHEMIN_DROITE) // se dirige vers le trou de droite puis quand il s'est téléporter avance vers la pomme
@@ -244,7 +244,7 @@ int main()
 			}
 			else
 			{
-				directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, TROU_HAUT_X, TROU_HAUT_Y, changement_S1);
+				directionSerpentVersObjectif1(lesX_S1, lesY_S1, lesX_S2, lesY_S2, lePlateau, &direction_S1, TROU_DROITE_X, TROU_DROITE_Y, changement_S1);
 			}
 		}
 		else // sinon se dirige uniquement vers la pomme
@@ -257,8 +257,6 @@ int main()
 
 
 
-
-		printf("Serpent 2 : %d\n", meilleureDistance_S2);
 		// appel la fonction qui s'occupe de changer ou non le mode de direction à la sortie d'un trou
 		if(sortieDuTrou_S2){
 			changement_S2 = changementDirection(lesX_S2, lesY_S2, nbPommesMangee, DistancePommePave);
@@ -275,7 +273,7 @@ int main()
 			}
 			else
 			{
-				directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, TROU_DROITE_X, TROU_DROITE_Y, changement_S2);
+				directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, TROU_HAUT_X, TROU_HAUT_Y, changement_S2);
 			}
 		}
 		else if (meilleureDistance_S2 == CHEMIN_BAS) // se dirige vers le trou du bas puis quand il s'est téléporter avance vers la pomme
@@ -287,7 +285,7 @@ int main()
 			}
 			else
 			{
-				directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, TROU_DROITE_X, TROU_DROITE_Y, changement_S2);
+				directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, TROU_BAS_X, TROU_BAS_Y, changement_S2);
 			}
 		}
 		else if (meilleureDistance_S2 == CHEMIN_GAUCHE) // se dirige vers le trou de gauche puis quand il s'est téléporter avance vers la pomme
@@ -299,7 +297,7 @@ int main()
 			}
 			else
 			{
-				directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, TROU_DROITE_X, TROU_DROITE_Y, changement_S2);
+				directionSerpentVersObjectif2(lesX_S2, lesY_S2, lesX_S1, lesY_S1, lePlateau, &direction_S2, TROU_GAUCHE_X, TROU_GAUCHE_Y, changement_S2);
 			}
 		}
 		else if (meilleureDistance_S2 == CHEMIN_DROITE) // se dirige vers le trou de droite puis quand il s'est téléporter avance vers la pomme
@@ -379,8 +377,8 @@ int main()
 
 	// afficher les performances du programme
 	printf("Temps CPU = %.3f secondes\n", tmpsCPU);
-	printf("Le serpent c'est déplacer %d fois et à mangé %d pommes\n", deplacement_S1, nbPommesMangee_S1);
-	printf("Le serpent c'est déplacer %d fois et à mangé %d pommes\n", deplacement_S2, nbPommesMangee_S2);
+	printf("Le serpent 1 s'est déplacer %d fois et à mangé %d pommes\n", deplacement_S1, nbPommesMangee_S1);
+	printf("Le serpent 2 s'est déplacer %d fois et à mangé %d pommes\n", deplacement_S2, nbPommesMangee_S2);
 
 	return EXIT_SUCCESS;
 }
